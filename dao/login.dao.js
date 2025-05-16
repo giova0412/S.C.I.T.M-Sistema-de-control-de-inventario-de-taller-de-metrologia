@@ -25,5 +25,8 @@ loginDAO.insert = async (user) => {
 loginDAO.setSesionAbierta = async (id, estado) => {
     return await Login.findByIdAndUpdate(id, { sesionAbierta: estado });
 };
-
+loginDAO.findById = async (id) => {
+    return await Login.findById(id);
+  };
+  
 export default loginDAO;
