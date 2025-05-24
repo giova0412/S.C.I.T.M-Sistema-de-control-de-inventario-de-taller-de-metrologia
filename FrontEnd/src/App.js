@@ -1,42 +1,60 @@
 import './App.css';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const togglePassword = () => {
     setShowPassword(!showPassword);
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    navigate('/herramientas');
+  };
+
+  const handleRegisterClick = (e) => {
+    e.preventDefault();
+    navigate('/register');
+  };
+
   return (
-    <div className="bg-custom-beige min-h-screen">
-      {/* Navbar simplificada */}
-      <nav className="bg-custom-olive p-4 fixed top-0 w-full shadow-md">
+    <div className="bg-pemex-gray min-h-screen">
+      <nav className="bg-pemex-green p-4 fixed top-0 w-full shadow-md z-10">
         <div className="container mx-auto">
-          <div className="text-white font-bold text-xl text-center">Mi Inventario</div>
+          <div className="text-pemex-white font-bold text-xl text-center">
+            Mi Inventario
+          </div>
         </div>
       </nav>
 
-      {/* Formulario de login */}
-      <div className="flex justify-center items-center min-h-screen">
-        <form className="bg-custom-pink shadow-md rounded-xl px-8 pt-6 pb-8 mb-4 w-96 mt-24">
-          <h1 className="text-2xl font-bold mb-6 text-center text-custom-brown">Inicia Sesión</h1>
+      <div className="flex justify-center items-center min-h-screen pt-20">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-pemex-white shadow-lg rounded-xl px-10 pt-8 pb-10 w-96"
+        >
+          <img src="/logo.png" alt="logo" className="w-24 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-6 text-center text-pemex-green">
+            Inicia Sesión
+          </h1>
 
-          <div className="form-group mb-4">
-            <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">
-              Nombre:
+          <div className="mb-5">
+            <label htmlFor="username" className="block text-pemex-dark-gray text-sm font-semibold mb-2">
+              Nombre de usuario:
             </label>
             <input
               type="text"
               id="username"
               name="username"
               required
-              className="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-custom-brown"
+              className="w-full px-4 py-2 border border-pemex-dark-gray rounded-lg focus:outline-none focus:border-pemex-green"
             />
           </div>
 
-          <div className="form-group mb-6">
-            <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-pemex-dark-gray text-sm font-semibold mb-2">
               Contraseña:
             </label>
             <div className="relative">
@@ -45,12 +63,12 @@ function App() {
                 id="password"
                 name="password"
                 required
-                className="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-custom-brown"
                 placeholder="********"
+                className="w-full px-4 py-2 border border-pemex-dark-gray rounded-lg focus:outline-none focus:border-pemex-green"
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-pemex-dark-gray hover:text-pemex-black"
                 onClick={togglePassword}
               >
                 {showPassword ? '🙈' : '👁️'}
@@ -59,11 +77,21 @@ function App() {
           </div>
 
           <button
-            className="bg-custom-brown text-white rounded-xl p-2 hover:bg-green-500 w-full transition-colors"
             type="submit"
+            className="w-full bg-pemex-red text-white font-semibold py-2 rounded-lg hover:bg-red-700 transition-colors"
           >
             Entrar
           </button>
+
+          <p className="text-center text-pemex-dark-gray text-sm mt-5">
+            ¿No tienes una cuenta?{' '}
+            <button
+              onClick={handleRegisterClick}
+              className="text-pemex-red hover:underline font-medium"
+            >
+              Regístrate
+            </button>
+          </p>
         </form>
       </div>
     </div>
