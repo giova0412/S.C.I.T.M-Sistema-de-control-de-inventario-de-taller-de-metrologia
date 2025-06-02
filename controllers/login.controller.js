@@ -59,7 +59,7 @@ loginController.logout = (req, res) => {
         .then((user) => {
             if (!user) {
                 return res.status(404).json({ message: "Usuario no encontrado 😥" });
-            }
+            }   
             // Marcar sesión como cerrada
             return loginDAO.setSesionAbierta(user._id, false).then(() => {
                 res.json({ message: "Sesión cerrada exitosamente 👍" });
