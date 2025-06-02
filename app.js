@@ -1,6 +1,8 @@
 import express from "express";
 import morgan from "morgan";
 import loginRoutes from './routes/login.routes.js';
+import inventarioRoutes from "./routes/inventario.routes.js";
+import reportesRoutes from "./routes/reportes.routes.js";
 
 const app = express();
 //configuracion de puerto
@@ -12,5 +14,11 @@ app.use(express.urlencoded({extended:true}));
 
 // Rutas
 app.use('/api/auth', loginRoutes);
+app.use("/api/inventario", inventarioRoutes);
+app.use("/api/reportes", reportesRoutes);
+
+app.listen(app.get('port'), () => {
+    console.log(`Servidor corriendo en http://localhost:${app.get('port')}`);
+});
 
 export default app;
