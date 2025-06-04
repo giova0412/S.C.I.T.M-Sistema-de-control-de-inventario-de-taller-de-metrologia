@@ -31,7 +31,6 @@ function Register() {
           </div>
         </div>
       </nav>
-
       {/* Login Form */}
       <div className="flex justify-center items-center min-h-screen pt-20">
         <form onSubmit={handleSubmit} className="bg-pemex-white shadow-lg rounded-xl px-10 pt-8 pb-10 w-96">

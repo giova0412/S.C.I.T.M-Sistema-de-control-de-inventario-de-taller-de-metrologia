@@ -19,6 +19,10 @@ function App() {
     e.preventDefault();
     navigate('/register');
   };
+  const handleRecoveryClick = (e) => {
+    e.preventDefault();
+    navigate('/recovery');
+  };
 
   return (
     <div className="bg-pemex-gray min-h-screen">
@@ -74,6 +78,12 @@ function App() {
                 {showPassword ? '🙈' : '👁️'}
               </button>
             </div>
+            <button
+              onClick={handleRecoveryClick}
+              className="text-pemex-red text-sm mt-2 hover:text-red-700 transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
           </div>
 
           <button

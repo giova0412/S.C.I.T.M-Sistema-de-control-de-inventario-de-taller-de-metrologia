@@ -3,6 +3,7 @@ import App from './App';
 import Register from './Register';
 import Herramientas from './Herramientas';
 import Reportes from './Reportes';
+import Recup from './Recup';
 
 function AppRouter() {
   return (
@@ -12,6 +13,7 @@ function AppRouter() {
       <Route path="/register" element={<Register />} />
       <Route path="/herramientas" element={<Herramientas />} />
       <Route path="/reportes" element={<Reportes />} />
+      <Route path='/recovery' element={<Recup/>}/>
       <Route path="*" element={<h1>404 - Página no encontrada</h1>} />
     </Routes>
   );
