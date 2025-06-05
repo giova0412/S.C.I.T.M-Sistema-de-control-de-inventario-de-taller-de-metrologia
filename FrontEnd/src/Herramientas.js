@@ -38,10 +38,9 @@ function Herramientas() {
       return;
     }
 
-    // Agregar nuevo reporte
+    // Agregar reporte
     setReportes(prevReportes => [...prevReportes, form]);
     
-    // Limpiar formulario
     setForm({
       nombre: "",
       ficha: "",

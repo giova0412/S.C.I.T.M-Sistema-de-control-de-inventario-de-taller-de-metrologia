@@ -18,8 +18,8 @@ function Recup() {
     };
 
     const validatePassword = (pass) => {
-        const minLength = 6; // Longitud mínima más corta para números
-        const onlyNumbers = /^\d+$/.test(pass); // Verifica que solo contenga números
+        const minLength = 6; 
+        const onlyNumbers = /^\d+$/.test(pass); 
 
         return pass.length >= minLength && onlyNumbers;
     };
@@ -50,7 +50,6 @@ function Recup() {
             return;
         }
 
-        // Aquí iría la lógica para actualizar la contraseña
         navigate('/login');
     };
 
@@ -66,19 +65,11 @@ function Recup() {
 
             <div className="flex justify-center items-center min-h-screen pt-20 px-4">
                 <form onSubmit={handleSubmit} 
-                      className="bg-white shadow-2xl rounded-xl px-8 pt-8 pb-10 w-full max-w-md
-                               transform transition-all duration-300 hover:scale-[1.01]
-                               animate-[fadeIn_0.5s_ease-out]">
+                      className="bg-white shadow-2xl rounded-xl px-8 pt-8 pb-10 w-full max-w-md transform transition-all duration-300 hover:scale-[1.01] animate-[fadeIn_0.5s_ease-out]">
                     <div className="text-center mb-8">
-                        <img src="/logo.png" alt="logo" 
-                             className="w-24 mx-auto mb-4 
-                                      animate-[bounceIn_1s_ease-out]" />
-                        <h1 className="text-2xl font-bold text-pemex-green">
-                            Recupera tu contraseña
-                        </h1>
-                        <p className="text-gray-600 mt-2">
-                            Ingresa tu nueva contraseña
-                        </p>
+                        <img src="/logo.png" alt="logo" className="w-24 mx-auto mb-4 animate-[bounceIn_1s_ease-out]" />
+                        <h1 className="text-2xl font-bold text-pemex-green">Recupera tu contraseña</h1>
+                        <p className="text-gray-600 mt-2">Ingresa tu nueva contraseña</p>
                     </div>
 
                     {error && (
@@ -89,28 +80,10 @@ function Recup() {
 
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-gray-700 text-sm font-bold mb-2">
-                                Nueva Contraseña
-                            </label>
+                            <label className="block text-gray-700 text-sm font-bold mb-2">Nueva Contraseña</label>
                             <div className="relative">
-                                <input
-            type={showPassword ? 'text' : 'password'}
-            inputMode="numeric" // Muestra teclado numérico en móviles
-            pattern="[0-9]*"   // Acepta solo números
-            value={password}
-            onChange={(e) => handlePasswordChange(e, false)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-pemex-green
-                     transition-all duration-300"
-            placeholder="123456"
-            required
-        />
-                                <button
-                                    type="button"
-                                    onClick={() => togglePassword('password')}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2
-                                             text-gray-500 hover:text-gray-700 transition-colors"
-                                >
+                                <input type={showPassword ? 'text' : 'password'}inputMode="numeric"pattern="[0-9]*"   value={password} onChange={(e) => handlePasswordChange(e, false)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pemex-green transition-all duration-300" placeholder="123456" required/>
+                                <button type="button" onClick={() => togglePassword('password')} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
                                     {showPassword ? (
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -126,28 +99,10 @@ function Recup() {
                         </div>
 
                         <div>
-                            <label className="block text-gray-700 text-sm font-bold mb-2">
-                                Confirmar Contraseña
-                            </label>
+                            <label className="block text-gray-700 text-sm font-bold mb-2">Confirmar Contraseña</label>
                             <div className="relative">
-                               <input
-            type={showConfirmPassword ? 'text' : 'password'}
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={confirmPassword}
-            onChange={(e) => handlePasswordChange(e, true)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-pemex-green
-                     transition-all duration-300"
-            placeholder="123456"
-            required
-        />
-                                <button
-                                    type="button"
-                                    onClick={() => togglePassword('confirm')}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2
-                                             text-gray-500 hover:text-gray-700 transition-colors"
-                                >
+                               <input type={showConfirmPassword ? 'text' : 'password'} inputMode="numeric"pattern="[0-9]*" value={confirmPassword}onChange={(e) => handlePasswordChange(e, true)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pemex-green transition-all duration-300" placeholder="123456" required/>
+                                <button type="button" onClick={() => togglePassword('confirm')} className="absolute right-3 top-1/2 transform -translate-y-1/ text-gray-500 hover:text-gray-700 transition-colors">
                                     {showConfirmPassword ? (
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -162,25 +117,8 @@ function Recup() {
                             </div>
                         </div>
 
-                        <button
-                            type="submit"
-                            className="w-full bg-pemex-green text-white font-bold py-3 rounded-lg
-                                     transform transition-all duration-300
-                                     hover:bg-pemex-dark-green hover:scale-[1.02]
-                                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pemex-green
-                                     active:scale-95"
-                        >
-                            Actualizar Contraseña
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => navigate('/login')}
-                            className="w-full mt-4 text-pemex-green font-semibold
-                                     hover:text-pemex-dark-green transition-colors"
-                        >
-                            Volver al inicio de sesión
-                        </button>
+                        <button type="submit" className="w-full bg-pemex-green text-white font-bold py-3 rounded-lg transform transition-all duration-300 hover:bg-pemex-dark-green hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pemex-green active:scale-95">Actualizar Contraseña</button>
+                        <button type="button"onClick={() => navigate('/login')}className="w-full mt-4 text-pemex-green font-semibold hover:text-pemex-dark-green transition-colors">Volver al inicio de sesión</button>
                     </div>
                 </form>
             </div>
