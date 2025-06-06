@@ -32,13 +32,11 @@ function Herramientas() {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validación de campos requeridos
     if (!form.nombre || !form.ficha) {
       alert("Por favor completa los campos nombre y ficha");
       return;
     }
 
-    // Agregar reporte
     setReportes(prevReportes => [...prevReportes, form]);
     
     setForm({
@@ -49,12 +47,10 @@ function Herramientas() {
       fechaRecibido: "",
     });
 
-    // Cerrar modal
     toggleModalReporte();
   };
    const toggleModalReporte = () => {
     setModalOpen(!modalOpen);
-    // Si estamos cerrando el modal, limpiamos el formulario
     if (modalOpen) {
       setForm({
         nombre: "",
