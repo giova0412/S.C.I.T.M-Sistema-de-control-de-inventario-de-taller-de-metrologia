@@ -4,7 +4,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 const require = createRequire(import.meta.url);
 const PDFDocument = require('pdfkit-table');
-import { Readable } from "stream" ;
+import { Readable } from "stream";
 
 const ReportesController = {};
 
@@ -98,44 +98,64 @@ ReportesController.deleteOne = (req, res) => {
 };
 
 ReportesController.downloadPDF = async (req, res) => {
-    try {  
+    try {
         const reportes = await ReportesDAO.getAll();
-        const doc = new PDFDocument({ margin: 30, size: 'A4' });
         
+        // Imprimir para depuración
+        console.log("Reportes recuperados:", JSON.stringify(reportes, null, 2));
+        
+        // Verificar explícitamente las fichas de trabajador
+        console.log("Valores de ficha_trabajador en reportes:");
+        reportes.forEach(r => console.log(`Reporte ID: ${r._id}, ficha_trabajador: ${r.ficha_trabajador || r._id}, tipo: ${typeof r.ficha_trabajador || typeof r._id}`));
+        
+        const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
         // Pipe the PDF directly to the response
         doc.pipe(res);
-        
+
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=reportes.pdf');
 
-        // Espacio para logo
-        doc.rect(30, 30, 150, 80).stroke();
-        doc.fontSize(10).text('Logo de la empresa', 65, 60);
+        // Logo (opcional)
+        const logoPath = join(process.cwd(), 'uploads', 'image.png');
+        console.log("Ruta del logo:", logoPath);
+        console.log("¿Existe el logo?:", existsSync(logoPath));
+        
+        if (existsSync(logoPath)) {
+            doc.image(logoPath, 30, 30, { width: 150, height: 80, fit: [150, 80] });
+        } else {
+            // Si no hay logo, dibuja un rectángulo
+            doc.rect(30, 30, 150, 80).stroke();
+            doc.fontSize(10).text('Logo de la empresa', 65, 60);
+        }
 
         // Título
         doc.fontSize(20).text('Reporte de Herramientas', 250, 55, { align: 'center' });
-        
+
         // Fecha de generación
         doc.fontSize(10).text(`Fecha: ${new Date().toLocaleDateString()}`, 450, 40);
 
         // Tabla
         const table = {
-            title: "Lista de Herramientas Prestadas",
+            title: "Lista de Herramientas Prestadas", 
             headers: [
-                "Ficha",
-                "Nombre",
-                "Herramienta",
-                "ID",
-                "F. Recibido",
-                "F. Entrega"
+                "Ficha Trabajador",
+                "Nombre Trabajador",
+                "Nombre Herramienta",
+                "ID Herramienta",
+                "Fecha Recibido",
+                "Fecha Entrega",
+                "Estado"
             ],
             rows: reportes.map(reporte => [
-                reporte.ficha_trabajador,
-                reporte.nombre,
-                reporte.nombre_herramienta || '',
-                reporte.id_herramienta,
+                // Usar _id si ficha_trabajador no está disponible
+                String(reporte.ficha_trabajador || reporte._id || 'No disponible'),
+                reporte.nombre || 'No disponible',
+                reporte.nombre_herramienta || 'No disponible',
+                String(reporte.id_herramienta || 'No disponible'),
                 new Date(reporte.fecha_recibido).toLocaleDateString(),
-                new Date(reporte.fecha_entrega).toLocaleDateString()
+                new Date(reporte.fecha_entrega).toLocaleDateString(),
+                reporte.estado_entrega || 'No disponible'
             ])
         };
 
@@ -151,7 +171,7 @@ ReportesController.downloadPDF = async (req, res) => {
             padding: 5,
             columnSpacing: 5,
             prepareHeader: () => doc.font('Helvetica-Bold').fontSize(10),
-            prepareRow: () => doc.font('Helvetica').fontSize(10)
+            prepareRow: () => doc.font('Helvetica').fontSize(9)
         });
 
         // Espacio para firma
@@ -163,11 +183,12 @@ ReportesController.downloadPDF = async (req, res) => {
         doc.end();
     } catch (error) {
         console.error('Error al generar PDF:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             message: "Error al generar PDF",
-            error: error.message 
+            error: error.message
         });
+
     }
 };
 
@@ -175,19 +196,23 @@ ReportesController.downloadOnePDF = async (req, res) => {
     try {
         const reporte = await ReportesDAO.getOne(req.params.ficha_trabajador);
         if (!reporte) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: false,
-                message: "Reporte no encontrado" 
+                message: "Reporte no encontrado"
             });
         }
+        
+        // Imprimir para depuración
+        console.log("Reporte individual recuperado:", JSON.stringify(reporte, null, 2));
+        console.log(`Reporte ID: ${reporte._id}, ficha_trabajador: ${reporte.ficha_trabajador || reporte._id}, tipo: ${typeof reporte.ficha_trabajador || typeof reporte._id}`);
 
         const doc = new PDFDocument({ margin: 30, size: 'A4' });
-        
+
         // Pipe the PDF directly to the response
         doc.pipe(res);
-        
+ 
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=reporte_${reporte.ficha_trabajador}.pdf`);
+        res.setHeader('Content-Disposition', `attachment; filename=reporte_${reporte.ficha_trabajador || reporte._id}.pdf`);
 
         // Logo (opcional)
         const logoPath = join(process.cwd(), 'uploads', 'image.png');
@@ -201,21 +226,22 @@ ReportesController.downloadOnePDF = async (req, res) => {
 
         // Título
         doc.fontSize(20).text('Reporte Individual de Herramienta', 250, 55, { align: 'center' });
-        
+
         // Fecha de generación
         doc.fontSize(10).text(`Fecha: ${new Date().toLocaleDateString()}`, 450, 40);
 
         // Tabla de datos
         const table = {
-            title: "Detalles de la Herramienta",
-            headers: ["Campo", "Valor"],
+            title: "Detalles del Préstamo",
+            headers: ["Campo", "Datos"],
             rows: [
-                ["Ficha Trabajador", reporte.ficha_trabajador],
-                ["Nombre", reporte.nombre],
-                ["Herramienta", reporte.nombre_herramienta || ''],
-                ["ID Herramienta", reporte.id_herramienta],
-                ["Fecha Recibido", new Date(reporte.fecha_recibido).toLocaleDateString()],
-                ["Fecha Entrega", new Date(reporte.fecha_entrega).toLocaleDateString()]
+                ["Ficha Trabajador", String(reporte.ficha_trabajador || reporte._id || 'No disponible')],
+                ["Nombre del Trabajador", reporte.nombre || 'No disponible'],
+                ["Nombre de la Herramienta", reporte.nombre_herramienta || 'No disponible'],
+                ["ID de la Herramienta", String(reporte.id_herramienta || 'No disponible')],
+                ["Fecha de Recepción", new Date(reporte.fecha_recibido).toLocaleDateString()],
+                ["Fecha de Entrega", new Date(reporte.fecha_entrega).toLocaleDateString()],
+                ["Estado de Entrega", reporte.estado_entrega || 'No disponible']
             ]
         };
 
@@ -242,10 +268,10 @@ ReportesController.downloadOnePDF = async (req, res) => {
         doc.end();
     } catch (error) {
         console.error('Error al generar PDF individual:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             message: "Error al generar PDF",
-            error: error.message 
+            error: error.message
         });
     }
 };

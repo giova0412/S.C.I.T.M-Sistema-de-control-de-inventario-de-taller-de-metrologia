@@ -1,0 +1,131 @@
+### MÓDULO DE AUTENTICACIÓN (LOGIN)
+### Base URL: http://localhost:3000/api/auth
+
+# 1. Registro de Usuario
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "nombre": "usuario1",
+  "email": "usuario1@example.com",
+  "password": "contraseña123"
+}
+
+# 2. Inicio de Sesión
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "nombre": "usuario1",
+  "password": "contraseña123"
+}
+
+# 3. Cierre de Sesión
+POST http://localhost:3000/api/auth/logout
+Content-Type: application/json
+
+{
+  "nombre": "usuario1"
+}
+
+# 4. Recuperar Contraseña
+POST http://localhost:3000/api/auth/recuperar
+Content-Type: application/json
+
+{
+  "email": "usuario1@example.com"
+}
+
+# 5. Restablecer Contraseña
+POST http://localhost:3000/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "token_recibido_por_email",
+  "newPassword": "nueva_contraseña123"
+}
+
+### MÓDULO DE INVENTARIO
+### Base URL: http://localhost:3000/api/inventario
+
+# 1. Obtener Todas las Herramientas
+GET http://localhost:3000/api/inventario
+
+# 2. Obtener Una Herramienta (por id_herramienta)
+GET http://localhost:3000/api/inventario/123
+
+# 3. Insertar Nueva Herramienta
+POST http://localhost:3000/api/inventario
+Content-Type: application/json
+
+{
+  "id_herramienta": 1,
+  "nombre_herramienta": "Calibrador",
+  "num_partida": 101,
+  "numero_serie": 10001,
+  "fecha_r": "2023-05-15",
+  "dep": "Metrología",
+  "medida": "mm",
+  "calibrado": true,
+  "fecha_calibrado": "2023-05-20"
+}
+
+# 4. Actualizar Herramienta (por id_herramienta)
+PUT http://localhost:3000/api/inventario/1
+Content-Type: application/json
+
+{
+  "nombre_herramienta": "Calibrador Digital",
+  "medida": "mm/inch"
+}
+
+# 5. Eliminar Herramienta (por id_herramienta)
+DELETE http://localhost:3000/api/inventario/1
+
+# 6. Actualizar Calibración
+PUT http://localhost:3000/api/inventario/calibracion/1
+Content-Type: application/json
+
+{
+  "calibracion_activa": true
+}
+
+### MÓDULO DE REPORTES
+### Base URL: http://localhost:3000/api/reportes
+
+# 1. Crear Nuevo Reporte
+POST http://localhost:3000/api/reportes
+Content-Type: application/json
+
+{
+  "ficha_trabajador": 12345,
+  "nombre": "Juan Pérez",
+  "id_herramienta": 1,
+  "fecha_recibido": "2023-05-10",
+  "fecha_entrega": "2023-05-20",
+  "imagen": "url_imagen.jpg",
+  "estado_entrega": "pendiente"
+}
+
+# 2. Obtener Todos los Reportes
+GET http://localhost:3000/api/reportes/reportesAll
+
+# 3. Obtener Reporte por Ficha de Trabajador
+GET http://localhost:3000/api/reportes/12345
+
+# 4. Actualizar Reporte (por ficha_trabajador)
+PUT http://localhost:3000/api/reportes/updateOne/12345
+Content-Type: application/json
+
+{
+  "estado_entrega": "Entregado"
+}
+
+# 5. Eliminar Reporte (por ficha_trabajador)
+DELETE http://localhost:3000/api/reportes/deleteOne/12345
+
+# 6. Descargar Todos los Reportes en PDF
+GET http://localhost:3000/api/reportes/downloadPDF
+
+# 7. Descargar Reporte Individual en PDF (por ficha_trabajador)
+GET http://localhost:3000/api/reportes/downloadPDF/12345 

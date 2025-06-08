@@ -1,4 +1,8 @@
 import InventarioDAO from "../dao/inventario.dao.js";
+import { createRequire } from 'module';
+import { join } from 'path';
+const require = createRequire(import.meta.url);
+const PDFDocument = require('pdfkit-table');
 
 const inventarioController = {};
 
@@ -40,7 +44,7 @@ inventarioController.getAll = (req, res) => {
 };
 
 inventarioController.getOne = (req, res) => {
-    InventarioDAO.getOne(req.params.id_herramienta)
+    InventarioDAO.getOne(req.params.id)
         .then((herramienta) => {
             res.json({
                 data: {
@@ -91,5 +95,35 @@ inventarioController.deleteOne = (req, res) => {
         });  
    
 };
-  
-export default inventarioController;
+
+inventarioController.actualizarCalibracion = async (req, res) => {
+    try {
+        const { id_herramienta, calibracion_activa } = req.body;
+        const fecha_calibracion = calibracion_activa ? new Date() : null; 
+        const estado_calibracion = calibracion_activa ? 'Calibrado' : 'Pendiente de calibración';
+ 
+        const herramientaActualizada = await InventarioDAO.updateOne(
+            {
+                calibracion_activa,  
+                fecha_calibracion,
+                estado_calibracion
+            },
+            id_herramienta
+        );
+
+        res.json({
+            success: true,
+            message: "Estado de calibración actualizado",
+            data: herramientaActualizada
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error al actualizar el estado de calibración", 
+            error: error.message
+        });
+    } 
+};
+
+
+export default inventarioController;   

@@ -9,4 +9,7 @@ router.post("/", InventarioController.insert);
 router.put("/:id", InventarioController.updateOne);
 router.delete("/:id", InventarioController.deleteOne);
 
+// Rutas para calibración
+router.put('/calibracion/:id_herramienta', InventarioController.actualizarCalibracion);
+
 export default router;
