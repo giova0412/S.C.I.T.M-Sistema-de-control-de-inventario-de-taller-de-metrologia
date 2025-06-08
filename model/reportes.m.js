@@ -1,8 +1,9 @@
-import { model, Schema, mongoose } from "mongoose";
+import { model, Schema } from "mongoose";
+
 const ReportSchema = new Schema({
-    ficha_trabajador: {
-        required: true,
+    _id: {
         type: Number,
+        alias: 'ficha_trabajador'
     },
     nombre: {
         required: true,
@@ -10,7 +11,7 @@ const ReportSchema = new Schema({
         type: String,
     },
     id_herramienta: {
-        type: Number, // <-- Cambiado de ObjectId a Number   
+        type: Number, // Referencia al _id de Inventario
         required: true,
     },
     fecha_recibido: {
@@ -21,14 +22,23 @@ const ReportSchema = new Schema({
         type: Date,
         required: true,
     },
-    imagen:{
+    
+    estado_entrega:{
         type:String,
-        required:true,
+        enum:["pendiente","Entregado","No entrega"],
+        default:"pendiente",
     }
 },
 {
     versionKey: false,
     timestamps: true,
+    id: false // Desactiva la virtualización id de Mongoose
+});
+
+// Oculta timestamps en la respuesta JSON
+ReportSchema.method("toJSON", function () {
+  const { createdAt, updatedAt, ...object } = this.toObject();
+  return object;
 });
 
 export default model("reportes", ReportSchema);

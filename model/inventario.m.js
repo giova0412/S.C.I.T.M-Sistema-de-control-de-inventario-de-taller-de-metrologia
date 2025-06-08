@@ -2,9 +2,9 @@ import { model, Schema } from "mongoose";
 
 const InventarioSchema = new Schema(
   {
-    id_herramienta: {
+    _id: {
       type: Number,
-      required: true,
+      alias: 'id_herramienta'
     },
     nombre_herramienta: {
       type: String,
@@ -47,12 +47,13 @@ const InventarioSchema = new Schema(
   {
     versionKey: false,
     timestamps: true,
+    id: false // Desactiva la virtualización id de Mongoose
   }
 );
 
-// Oculta _id y timestamps en la respuesta JSON
+// Oculta timestamps en la respuesta JSON
 InventarioSchema.method("toJSON", function () {
-  const { _id, createdAt, updatedAt, ...object } = this.toObject();
+  const { createdAt, updatedAt, ...object } = this.toObject();
   return object;
 });
 

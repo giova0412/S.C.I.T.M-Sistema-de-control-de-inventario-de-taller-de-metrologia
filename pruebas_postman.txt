@@ -1,0 +1,162 @@
+### PRUEBAS DEL MÓDULO DE INVENTARIO
+
+## Prueba 1: Insertar una nueva herramienta
+POST http://localhost:3000/api/inventario
+Content-Type: application/json
+
+{
+  "id_herramienta": 1001,
+  "nombre_herramienta": "Calibrador Digital",
+  "num_partida": 501,
+  "numero_serie": 20001,
+  "fecha_r": "2023-10-15",
+  "dep": "Metrología",
+  "medida": "mm",
+  "calibrado": true,
+  "fecha_calibrado": "2023-10-20"
+}
+
+## Prueba 2: Insertar una segunda herramienta
+POST http://localhost:3000/api/inventario
+Content-Type: application/json
+
+{
+  "id_herramienta": 1002,
+  "nombre_herramienta": "Micrómetro",
+  "num_partida": 502,
+  "numero_serie": 20002,
+  "fecha_r": "2023-10-16",
+  "dep": "Metrología",
+  "medida": "μm",
+  "calibrado": false,
+  "fecha_calibrado": "2023-09-15"
+}
+
+## Prueba 3: Obtener todas las herramientas
+GET http://localhost:3000/api/inventario
+
+## Prueba 4: Obtener una herramienta específica
+GET http://localhost:3000/api/inventario/1001
+
+## Prueba 5: Actualizar una herramienta
+PUT http://localhost:3000/api/inventario/1001
+Content-Type: application/json
+
+{
+  "nombre_herramienta": "Calibrador Digital de Precisión",
+  "medida": "mm/inch",
+  "calibrado": true
+}
+
+## Prueba 6: Actualizar el estado de calibración
+PUT http://localhost:3000/api/inventario/calibracion/1002
+Content-Type: application/json
+
+{
+  "calibracion_activa": true
+}
+
+## Prueba 7: Eliminar una herramienta
+DELETE http://localhost:3000/api/inventario/1002
+
+### PRUEBAS DEL MÓDULO DE REPORTES
+
+## Prueba 1: Crear un nuevo reporte
+POST http://localhost:3000/api/reportes
+Content-Type: application/json
+
+{
+  "ficha_trabajador": 5001,
+  "nombre": "Carlos Rodríguez",
+  "id_herramienta": 1001,
+  "fecha_recibido": "2023-11-01",
+  "fecha_entrega": "2023-11-15",
+  "imagen": "carlos_firma.jpg",
+  "estado_entrega": "pendiente"
+}
+
+## Prueba 2: Crear un segundo reporte
+POST http://localhost:3000/api/reportes
+Content-Type: application/json
+
+{
+  "ficha_trabajador": 5002,
+  "nombre": "María González",
+  "id_herramienta": 1001,
+  "fecha_recibido": "2023-11-05",
+  "fecha_entrega": "2023-11-20",
+  "imagen": "maria_firma.jpg",
+  "estado_entrega": "pendiente"
+}
+
+## Prueba 3: Obtener todos los reportes
+GET http://localhost:3000/api/reportes/reportesAll
+
+## Prueba 4: Obtener un reporte específico
+GET http://localhost:3000/api/reportes/5001
+
+## Prueba 5: Actualizar un reporte (cambiar estado a entregado)
+PUT http://localhost:3000/api/reportes/updateOne/5001
+Content-Type: application/json
+
+{
+  "estado_entrega": "Entregado"
+}
+
+## Prueba 6: Descargar todos los reportes en PDF
+GET http://localhost:3000/api/reportes/downloadPDF
+
+## Prueba 7: Descargar un reporte específico en PDF
+GET http://localhost:3000/api/reportes/downloadPDF/5001
+
+## Prueba 8: Eliminar un reporte
+DELETE http://localhost:3000/api/reportes/deleteOne/5002
+
+### FLUJO DE TRABAJO COMPLETO
+
+## 1. Crear herramienta
+POST http://localhost:3000/api/inventario
+Content-Type: application/json
+
+{
+  "id_herramienta": 2001,
+  "nombre_herramienta": "Cinta métrica",
+  "num_partida": 601,
+  "numero_serie": 30001,
+  "fecha_r": "2023-11-10",
+  "dep": "Medición",
+  "medida": "m",
+  "calibrado": true,
+  "fecha_calibrado": "2023-11-05"
+}
+
+## 2. Verificar la herramienta creada
+GET http://localhost:3000/api/inventario/2001
+
+## 3. Crear reporte de préstamo para esta herramienta
+POST http://localhost:3000/api/reportes
+Content-Type: application/json
+
+{
+  "ficha_trabajador": 6001,
+  "nombre": "Juan Pérez",
+  "id_herramienta": 2001,
+  "fecha_recibido": "2023-11-11",
+  "fecha_entrega": "2023-11-25",
+  "imagen": "juan_firma.jpg",
+  "estado_entrega": "pendiente"
+}
+
+## 4. Verificar el reporte creado
+GET http://localhost:3000/api/reportes/6001
+
+## 5. Marcar la herramienta como entregada
+PUT http://localhost:3000/api/reportes/updateOne/6001
+Content-Type: application/json
+
+{
+  "estado_entrega": "Entregado"
+}
+
+## 6. Verificar que se actualizó el reporte
+GET http://localhost:3000/api/reportes/6001
