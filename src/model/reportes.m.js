@@ -19,11 +19,11 @@ const ReportSchema = new Schema({
         required: true,
     },
     fecha_entrega: {
-        type: Date,
+        type: Date, 
         required: true,
     },
     
-    estado_entrega:{
+    estado_entrega:{   
         type:String,
         enum:["pendiente","Entregado","No entrega"],
         default:"pendiente",

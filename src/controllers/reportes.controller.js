@@ -97,7 +97,7 @@ ReportesController.deleteOne = (req, res) => {
         });
 };
 
-ReportesController.downloadPDF = async (req, res) => {
+ReportesController.downloadPDF = async (req, res) => { 
     try {
         const reportes = await ReportesDAO.getAll();
         
@@ -117,7 +117,7 @@ ReportesController.downloadPDF = async (req, res) => {
         res.setHeader('Content-Disposition', 'attachment; filename=reportes.pdf');
 
         // Logo (opcional)
-        const logoPath = join(process.cwd(), 'uploads', 'image.png');
+        const logoPath = join(process.cwd(), 'src', 'uploads', 'image.png');
         console.log("Ruta del logo:", logoPath);
         console.log("¿Existe el logo?:", existsSync(logoPath));
         
@@ -215,7 +215,7 @@ ReportesController.downloadOnePDF = async (req, res) => {
         res.setHeader('Content-Disposition', `attachment; filename=reporte_${reporte.ficha_trabajador || reporte._id}.pdf`);
 
         // Logo (opcional)
-        const logoPath = join(process.cwd(), 'uploads', 'image.png');
+        const logoPath = join(process.cwd(), 'src', 'uploads', 'image.png');
         if (existsSync(logoPath)) {
             doc.image(logoPath, 30, 30, { width: 150, height: 80, fit: [150, 80] });
         } else {
