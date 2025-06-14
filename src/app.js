@@ -17,8 +17,4 @@ app.use('/api/auth', loginRoutes);
 app.use("/api/inventario", inventarioRoutes);
 app.use("/api/reportes", reportesRoutes);
 
-app.listen(app.get('port'), () => {
-    console.log(`Servidor corriendo en http://localhost:${app.get('port')}`);
-});
-
 export default app;
