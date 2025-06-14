@@ -59,7 +59,7 @@ function Register() {
       <nav className="bg-pemex-green p-4 fixed top-0 w-full shadow-md z-10">
         <div className="container mx-auto">
           <div className="text-pemex-white font-bold text-xl text-center">
-            Mi Inventario
+             SISTEMA DE CONTROL METROLOGIA
           </div>
         </div>
       </nav>
@@ -72,7 +72,7 @@ function Register() {
           </h1>
 
           <div className="mb-5">
-            <label htmlFor="username" className="block text-pemex-dark-gray text-sm font-semibold mb-2">
+            <label htmlFor="username" className="block  text-gray-700 text-sm font-bold mb-2">
               Nombre de usuario:
             </label>
             <input
@@ -80,13 +80,13 @@ function Register() {
               id="username"
               name="username"
               required
-              className="w-full px-4 py-2 border border-pemex-dark-gray rounded-lg focus:outline-none focus:border-pemex-green"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pemex-green transition-all duration-300"
             />
           </div>
 
           {/* Correo electrónico */}
           <div className="mb-5">
-            <label htmlFor="email" className="block text-pemex-dark-gray text-sm font-semibold mb-2">
+            <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
               Correo electrónico:
             </label>
             <input
@@ -94,7 +94,7 @@ function Register() {
               id="email"
               name="email"
               required
-              className="w-full px-4 py-2 border border-pemex-dark-gray rounded-lg focus:outline-none focus:border-pemex-green"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pemex-green transition-all duration-300"
             />
           </div>
 

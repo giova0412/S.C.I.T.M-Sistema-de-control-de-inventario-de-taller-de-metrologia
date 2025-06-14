@@ -58,7 +58,7 @@ function Recup() {
             <nav className="bg-pemex-green p-4 fixed top-0 w-full shadow-md z-10">
                 <div className="container mx-auto">
                     <div className="text-pemex-white font-bold text-xl text-center">
-                        Mi Inventario
+                       SISTEMA DE CONTROL METROLOGIA
                     </div>
                 </div>
             </nav>

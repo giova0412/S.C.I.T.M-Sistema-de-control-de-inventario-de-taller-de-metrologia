@@ -74,6 +74,7 @@ function Herramientas() {
     partida: "",
     fecha: "",
     depto: "",
+    medida:"",
   });
   const [nuevaFoto, setNuevaFoto] = useState(null);
   const handleEditSubmit = (e) => {
@@ -108,29 +109,19 @@ function Herramientas() {
     );
   });
   return (
-    <div className="flex  bg-gray-100">
+    <div className="flex bg-gray-100">
       {/* Sidebar */}
       <aside
         className={`${sidebarOpen ? "w-64" : "w-16"
           } bg-pemex-green h-screen transition-all duration-300 fixed left-0`}
       >
-        <div className="p-4 flex justify-between items-center">{sidebarOpen && <span className="text-white font-bold">Menú</span>}
-          <button onClick={toggleSidebar} className="andform hover:scale-110  transition-all duration-500 text-white p-2 rounded hover:bg-pemex-dark-green ">
+        <div className="p-4 flex justify-between items-center">{sidebarOpen && <span className="text-white font-bold ">Menú</span>}
+          <button onClick={toggleSidebar} className="andform hover:scale-150  transition-all duration-500 text-white p-2 rounded hover:bg-pemex-dark-green text-xl ">
             {sidebarOpen ? "◄" : "►"}
           </button>
         </div>
 
         <nav className="mt-8 space-y-2">
-          <div
-            onClick={() => navigate("/reportes")}
-            className={` blick hover:bg-gray-500  transition-all duration-500 andform  flex items-center px-4 py-3 text-white hover:bg-pemex-dark-green cursor-pointer`}
-          >
-            <span className="text-xl"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
-            </span>
-            {sidebarOpen && <span className="ml-3">Reportes</span>}
-          </div>
-
           <div
             onClick={() => navigate("/herramientas")}
             className={`andform hover:bg-gray-500  transition-all duration-500 flex items-center px-4 py-3 text-white bg-pemex-dark-green cursor-pointer`}
@@ -140,9 +131,18 @@ function Herramientas() {
             </span>
             {sidebarOpen && <span className="ml-3">Herramientas</span>}
           </div>
+          <div
+            onClick={() => navigate("/reportes")}
+            className={` blick hover:bg-gray-500  transition-all duration-500 andform  flex items-center px-4 py-3 text-white hover:bg-pemex-dark-green cursor-pointer`}
+          >
+            <span className="text-xl"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+            </span>
+            {sidebarOpen && <span className="ml-3">Reportes</span>}
+          </div>
         </nav>
 
-        <div className={`andform hover:scale-110  transition-all duration-500 absolute bottom-0 w-full flex items-center px-4 py-3 text-white hover:bg-pemex-dark-green cursor-pointer`} onClick={() => navigate("/")}>
+        <div className={`andform hover:scale-110  transition-all duration-500 absolute bottom-0 w-50 flex items-center px-3 py-2 m-2  text-pemex-gray hover:bg-pemex-dark-green cursor-pointer bg-red-600 rounded-full`} onClick={() => navigate("/")}>
          <span className="text-xl">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>
@@ -154,10 +154,8 @@ function Herramientas() {
       {/* Contenido principal */}
       <main className={` flex-1 ${sidebarOpen ? "ml-64" : "ml-16"} transition-all duration-300`}>
         <nav className="bg-pemex-green p-4 shadow-md ">
-          <div className="container mx-auto">
-            <div className="text-pemex-white font-bold text-xl text-center">
-              Mi Inventario
-            </div>
+          <div className="container mx-auto ">
+            <div className="text-pemex-white font-bold text-xl text-center ">SISTEMA DE CONTROL METROLOGIA</div>
           </div>
         </nav>
         <div className="p-6">
@@ -202,6 +200,10 @@ function Herramientas() {
                       <span className="text-slate-600 font-medium">Depto:</span>
                       <span className="text-slate-600">{herramienta.depto}</span>
                     </div>
+                     <div className="flex justify-between">
+                      <span className="text-slate-600 font-medium">medida:</span>
+                      <span className="text-slate-600">{herramienta.medida}</span>
+                    </div>
                   </div>
                   <div className="px-4 pt-2">
                     <label className="flex items-center space-x-2 cursor-pointer">
@@ -228,9 +230,10 @@ function Herramientas() {
               </div>
             ))}
           </div>
-          <button onClick={toggleModalAgregar} className="fixed bottom-6 right-6 z-50 rounded-full bg-green-500  text-white py-3 px-5 shadow-lg hover:bg-green-700 transition-all duration-300 hover:animate-float" type="button">+</button> {modalOpenAgrgar && (
+          <button onClick={toggleModalAgregar} className="fixed bottom-6 right-6 z-50 rounded-full bg-green-500  text-white py-3 px-5 shadow-lg hover:bg-green-700 transition-all duration-300 hover:animate-float flex " type="button">+</button> 
+          {modalOpenAgrgar && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" aria-modal="true" role="dialog">
-          <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl animate-[slideIn_0.35s_ease-out] transform transition-transform duration-300 hover:scale-[1.015]" >
+          <div className="bg-white rounded-xl p-8 w-70   max-w-md shadow-2xl  nimate-[slideIn_0.35s_ease-out] transform transition-transform duration-300 hover:scale-[1.015] overflow-y-auto max-h-screen" >
             <h2 className="text-3xl font-extrabold text-center text-pemex-green mb-8 tracking-wide">Agregar Nueva Herramienta</h2>
 
           <form onSubmit={(e) => { e.preventDefault();
@@ -240,6 +243,7 @@ function Herramientas() {
               !nuevaHerramienta.partida ||
               !nuevaHerramienta.fecha ||
               !nuevaHerramienta.depto ||
+              !nuevaHerramienta.medida ||
               !nuevaFoto
             ) {
               alert("Por favor completa todos los campos.");
@@ -253,6 +257,8 @@ function Herramientas() {
               partida: "",
               fecha: "",
               depto: "",
+              medida:"",
+
             });
             setNuevaFoto(null);
             toggleModalAgregar();
@@ -263,6 +269,7 @@ function Herramientas() {
             { type: "text", placeholder: "Partida", name: "partida", value: nuevaHerramienta.partida },
             { type: "date", placeholder: "Fecha", name: "fecha", value: nuevaHerramienta.fecha },
             { type: "text", placeholder: "Departamento", name: "depto", value: nuevaHerramienta.depto },
+            { type: "text", placeholder: "Medida", name: "medida", value: nuevaHerramienta.medida },
           ].map(({ type, placeholder, name, value }) => (
             <input key={name} type={type} name={name} placeholder={placeholder} value={value}onChange={(e) =>
               setNuevaHerramienta({ ...nuevaHerramienta, [name]: e.target.value })}required className="w-full rounded-lg border border-gray-300 px-4 py-3
@@ -335,198 +342,85 @@ function Herramientas() {
           </div>
 
           {editModalOpen && editingHerramienta && (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
-    aria-modal="true"
-    role="dialog"
-  >
-    <div
-      className="bg-white rounded-xl p-8 w-full max-w-md
-                 shadow-2xl
-                 animate-[slideIn_0.35s_ease-out]
-                 transform
-                 transition-transform duration-300
-                 hover:scale-[1.03]"
-      style={{ animationName: 'slideIn', animationDuration: '0.35s', animationTimingFunction: 'ease-out' }}
-    >
-      <h2 className="text-3xl font-extrabold text-center text-pemex-green mb-8 tracking-wide">
-        Editar Herramienta
-      </h2>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" aria-modal="true" role="dialog">
+            <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl animate-[slideIn_0.35s_ease-out] transform transition-transform duration-300 hover:scale-[1.03]"
+              style={{ animationName: 'slideIn', animationDuration: '0.35s', animationTimingFunction: 'ease-out' }}>
+            <h2 className="text-3xl font-extrabold text-center text-pemex-green mb-8 tracking-wide">Editar Herramienta</h2>
 
-      <form onSubmit={handleEditSubmit} className="space-y-6">
-        {[
-          { type: 'text', placeholder: 'Nombre', name: 'nombre', value: editingHerramienta.nombre },
-          { type: 'number', placeholder: 'ID', name: 'aid', value: editingHerramienta.aid },
-          { type: 'text', placeholder: 'Partida', name: 'partida', value: editingHerramienta.partida },
-          { type: 'date', placeholder: 'Fecha', name: 'fecha', value: editingHerramienta.fecha },
-          { type: 'text', placeholder: 'Departamento', name: 'depto', value: editingHerramienta.depto },
-        ].map(({ type, placeholder, name, value }) => (
-          <input
-            key={name}
-            type={type}
-            name={name}
-            placeholder={placeholder}
-            value={value}
-            onChange={(e) => setEditingHerramienta({ ...editingHerramienta, [name]: e.target.value })}
-            required
-            className="w-full rounded-lg border border-gray-300 px-4 py-3
-                       placeholder-gray-400
-                       focus:outline-none focus:ring-2 focus:ring-pemex-green focus:border-pemex-green
-                       transition-colors duration-300
-                       hover:border-pemex-green
-                       shadow-sm
-                       text-gray-800
-                       font-medium"
-          />
-        ))}
+            <form onSubmit={handleEditSubmit} className="space-y-6">
+              {[
+                { type: 'text', placeholder: 'Nombre', name: 'nombre', value: editingHerramienta.nombre },
+                { type: 'number', placeholder: 'ID', name: 'aid', value: editingHerramienta.aid },
+                { type: 'text', placeholder: 'Partida', name: 'partida', value: editingHerramienta.partida },
+                { type: 'date', placeholder: 'Fecha', name: 'fecha', value: editingHerramienta.fecha },
+                { type: 'text', placeholder: 'Departamento', name: 'depto', value: editingHerramienta.depto },
+                { type: 'text', placeholder: 'Medida', name: 'medida', value: editingHerramienta.medida },
+              ].map(({ type, placeholder, name, value }) => (
+              <input key={name} type={type} name={name} placeholder={placeholder} value={value} onChange={(e) => setEditingHerramienta({ ...editingHerramienta, [name]: e.target.value })}
+                required
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pemex-green focus:border-pemex-green transition-colors duration-300 hover:border-pemex-green shadow-sm text-gray-800 font-medium"/>
+              ))}
 
-        <div className="flex justify-end gap-5 pt-6">
-          <button
-            type="button"
-            onClick={() => {
-              setEditModalOpen(false);
-              setEditingHerramienta(null);
-            }}
-            className="rounded-lg bg-red-600 px-6 py-3 text-white font-semibold
-                       hover:bg-red-700
-                       transition-colors duration-300
-                       transform hover:scale-105 hover:shadow-lg"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-           className="rounded-lg bg-pemex-green px-6 py-3 text-white 
-             font-semibold hover:bg-pemex-dark-green 
-             transition-all duration-300 hover:animate-bounceLight"
-          >
-            Guardar
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <style jsx>{`
-      @keyframes slideIn {
-        0% {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    `}</style>
-  </div>
-)}
-
-{modalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-                        <div className="max-h-[90vh] overflow-auto w-full max-w-md rounded-lg bg-white p-6">
-                            <div className="mb-6 flex items-center justify-between">
-                                <h4 className="text-xl font-bold text-pemex-green">Agregar Reporte</h4>
-                                <button
-                                    onClick={toggleModalReporte}
-                                    className="andform hover:scale-110 transition-all duration-500 text-pemex-green hover:bg-pemex-green hover:text-white rounded-full p-1.5"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-6 w-6"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M6 18L18 6M6 6l12 12"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <label className="block">
-                                    <span className="text-pemex-green font-bold">Nombre</span>
-                                    <input
-                                        type="text"
-                                        name="nombre"
-                                        value={form.nombre}
-                                        onChange={handleChange}
-                                        className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"
-                                        required
-                                    />
-                                </label>
-
-                                <label className="block">
-                                    <span className="text-pemex-green font-bold">Ficha</span>
-                                    <input
-                                        type="text"
-                                        name="ficha"
-                                        value={form.ficha}
-                                        onChange={handleChange}
-                                        className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"
-                                        required
-                                    />
-                                </label>
-
-                                <label className="block">
-                                    <span className="text-pemex-green font-bold">Status</span>
-                                    <select
-                                        name="status"
-                                        value={form.status}
-                                        onChange={handleChange}
-                                        className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"
-                                    >
-                                        <option value="Pendiente">Pendiente</option>
-                                        <option value="Entregado">Entregado</option>
-                                    </select>
-                                </label>
-
-                                <label className="block">
-                                    <span className="text-pemex-green font-bold">Fecha entregado</span>
-                                    <input
-                                        type="date"
-                                        name="fechaEntregado"
-                                        value={form.fechaEntregado}
-                                        onChange={handleChange}
-                                        className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"
-                                    />
-                                </label>
-
-                                <label className="block">
-                                    <span className="text-pemex-green font-bold">Fecha recibido</span>
-                                    <input
-                                        type="date"
-                                        name="fechaRecibido"
-                                        value={form.fechaRecibido}
-                                        onChange={handleChange}
-                                        className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"
-                                    />
-                                </label>
-
-                                <div className="flex justify-end gap-2 pt-3">
-                                    <button
-                                        type="button"
-                                        onClick={toggleModalReporte}
-                                        className="andform rounded bg-gray-200 px-4 py-2 font-bold text-gray-600 hover:bg-gray-300"
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="andform rounded bg-pemex-green px-4 py-2 font-bold text-white hover:bg-pemex-dark-green"
-                                    >
-                                        Agregar
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
-
+              <div className="flex justify-end gap-5 pt-6">
+                <button type="button" onClick={() => { setEditModalOpen(false); setEditingHerramienta(null);}} className="rounded-lg bg-red-600 px-6 py-3 text-white font-semibold hover:bg-red-700 transition-colors duration-300 transform hover:scale-105 hover:shadow-lg">Cancelar</button>
+                <button type="submit" className="rounded-lg bg-pemex-green px-6 py-3 text-white font-semibold hover:bg-pemex-dark-green  transition-all duration-300 hover:animate-bounceLight">Guardar</button>
+              </div>
+            </form>
+          </div>
+          <style jsx>{`
+            @keyframes slideIn {
+              0% {
+                opacity: 0;
+                transform: translateY(-20px);
+              }
+              100% {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+          `}</style>
+          </div>
+        )}
+        {modalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+            <div className="max-h-[90vh] overflow-auto w-full max-w-md rounded-lg bg-white p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <h4 className="text-xl font-bold text-pemex-green">Agregar Reporte</h4>
+                <button onClick={toggleModalReporte} className="andform hover:scale-110 transition-all duration-500 text-pemex-green hover:bg-pemex-green hover:text-white rounded-full p-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <label className="block">
+                <span className="text-pemex-green font-bold">Nombre</span>
+                <input type="text"name="nombre"value={form.nombre} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" required/>
+                </label>
+                <label className="block"><span className="text-pemex-green font-bold">Ficha</span>
+                  <input type="text" name="ficha" value={form.ficha} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"required/>
+                </label>
+                <label className="block"><span className="text-pemex-green font-bold">Status</span>
+                  <select name="status" value={form.status} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700">
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Entregado">Entregado</option>
+                  </select>
+                </label>
+                <label className="block"><span className="text-pemex-green font-bold">Fecha entregado</span>
+                  <input type="date" name="fechaEntregado" value={form.fechaEntregado} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"/>
+                </label>
+                <label className="block">
+                  <span className="text-pemex-green font-bold">Fecha recibido</span>
+                  <input type="date" name="fechaRecibido" value={form.fechaRecibido} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"/>
+                </label>
+                <div className="flex justify-end gap-2 pt-3">
+                  <button type="button" onClick={toggleModalReporte} className="andform rounded bg-gray-200 px-4 py-2 font-bold text-gray-600 hover:bg-gray-300">Cancelar</button>
+                  <button type="submit" className="andform rounded bg-pemex-green px-4 py-2 font-bold text-white hover:bg-pemex-dark-green">Agregar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
