@@ -7,30 +7,65 @@ const PDFDocument = require('pdfkit-table');
 const inventarioController = {};
 
 inventarioController.insert = (req, res) => {
-    InventarioDAO.insert(req.body)
-        .then((response) => {
-            res.json({
-                data: {
-                    message: "Herramienta insertada correctamente",
-                    herramienta: response
-                }
+    try {
+        console.log('Datos recibidos en insert:', req.body);
+        console.log('Archivo recibido:', req.file);
+        
+        // Preparar los datos de la herramienta
+        const herramientaData = { ...req.body };
+        
+        // Si se subió una imagen, agregar la URL
+        if (req.file) {
+            herramientaData.imagen_url = `/api/inventario/imagen/${req.file.filename}`;
+            console.log('URL de imagen agregada:', herramientaData.imagen_url);
+        }
+        
+        console.log('Datos finales a enviar al DAO:', herramientaData);
+        
+        InventarioDAO.insert(herramientaData)
+            .then((response) => {
+                console.log('Respuesta del DAO:', response);
+                res.json({
+                    data: {
+                        message: "Herramienta insertada correctamente"
+                    }
+                });
+            })
+            .catch((error) => {
+                console.error('Error en el DAO:', error);
+                res.status(500).json({
+                    data: {
+                        message: `Error al insertar herramienta: ${error.message}`
+                    }
+                });
             });
-        })
-        .catch((error) => {
-            res.json({
-                data: {
-                    message: error
-                }
-            });
+    } catch (error) {
+        console.error('Error en el controlador:', error);
+        res.status(500).json({
+            data: {
+                message: "Error al procesar la solicitud"
+            }
         });
+    }
 };
 
 inventarioController.getAll = (req, res) => {
     InventarioDAO.getAll()
         .then((herramientas) => {
+            // Asegurar que todas las herramientas tengan la URL completa de la imagen
+            const herramientasConImagenes = herramientas.map(herramienta => {
+                const herramientaObj = herramienta.toObject ? herramienta.toObject() : herramienta;
+                if (herramientaObj.imagen_url && !herramientaObj.imagen_url.startsWith('http')) {
+                    // Construir URL completa si no es una URL completa
+                    const baseUrl = `${req.protocol}://${req.get('host')}`;
+                    herramientaObj.imagen_url = `${baseUrl}${herramientaObj.imagen_url}`;
+                }
+                return herramientaObj;
+            });
+            
             res.json({
                 data: {
-                    herramientas: herramientas
+                    herramientas: herramientasConImagenes
                 }
             });
         })
@@ -46,11 +81,26 @@ inventarioController.getAll = (req, res) => {
 inventarioController.getOne = (req, res) => {
     InventarioDAO.getOne(req.params.id)
         .then((herramienta) => {
-            res.json({
-                data: {
-                    herramienta: herramienta
+            if (herramienta) {
+                const herramientaObj = herramienta.toObject ? herramienta.toObject() : herramienta;
+                if (herramientaObj.imagen_url && !herramientaObj.imagen_url.startsWith('http')) {
+                    // Construir URL completa si no es una URL completa
+                    const baseUrl = `${req.protocol}://${req.get('host')}`;
+                    herramientaObj.imagen_url = `${baseUrl}${herramientaObj.imagen_url}`;
                 }
-            });
+                
+                res.json({
+                    data: {
+                        herramienta: herramientaObj
+                    }
+                });
+            } else {
+                res.status(404).json({
+                    data: {
+                        message: "Herramienta no encontrada"
+                    }
+                });
+            }
         })
         .catch((error) => {
             res.json({
@@ -98,7 +148,8 @@ inventarioController.deleteOne = (req, res) => {
 
 inventarioController.actualizarCalibracion = async (req, res) => {
     try {
-        const { id_herramienta, calibracion_activa } = req.body;
+        const { calibracion_activa } = req.body;
+        const id_herramienta = req.params.id_herramienta;
         const fecha_calibracion = calibracion_activa ? new Date() : null; 
         const estado_calibracion = calibracion_activa ? 'Calibrado' : 'Pendiente de calibración';
  
@@ -125,5 +176,40 @@ inventarioController.actualizarCalibracion = async (req, res) => {
     } 
 };
 
+inventarioController.updateImagen = (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                data: {
+                    message: "No se proporcionó ninguna imagen"
+                }
+            });
+        }
+
+        const imagenUrl = `/api/inventario/imagen/${req.file.filename}`;
+        
+        InventarioDAO.updateOne({ imagen_url: imagenUrl }, req.params.id)
+            .then((result) => {
+                res.json({
+                    data: {
+                        message: "Imagen actualizada correctamente"
+                    }
+                });
+            })
+            .catch((error) => {
+                res.json({
+                    data: {
+                        message: error
+                    }
+                });
+            });
+    } catch (error) {
+        res.status(500).json({
+            data: {
+                message: "Error al procesar la solicitud"
+            }
+        });
+    }
+};
 
 export default inventarioController;   

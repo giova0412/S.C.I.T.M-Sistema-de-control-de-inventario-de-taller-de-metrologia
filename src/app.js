@@ -11,7 +11,7 @@ app.set('port',process.env.PORT||3000);
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-
+ 
 // Rutas
 app.use('/api/auth', loginRoutes);
 app.use("/api/inventario", inventarioRoutes);

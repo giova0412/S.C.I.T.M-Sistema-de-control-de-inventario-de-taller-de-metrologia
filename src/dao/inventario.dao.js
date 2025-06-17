@@ -3,9 +3,54 @@ import Inventario from "../model/inventario.m.js";
 const InventarioDAO = {};
 
 InventarioDAO.insert = async (herramienta) => {
-    // Asegurarse de que _id esté establecido como id_herramienta
-    herramienta._id = herramienta.id_herramienta || herramienta._id;
-    return await Inventario.create(herramienta);
+    try {
+        // Preparar los datos de la herramienta
+        const herramientaData = { ...herramienta };
+        
+        // Usar el ID que proporciona el usuario
+        if (herramientaData.id_herramienta && !herramientaData._id) {
+            herramientaData._id = herramientaData.id_herramienta;
+        }
+        
+        // Verificar que se proporcione un ID
+        if (!herramientaData._id) {
+            throw new Error('Se debe proporcionar un ID para la herramienta');
+        }
+        
+        // Asegurar que las fechas sean objetos Date
+        if (herramientaData.fecha_r && typeof herramientaData.fecha_r === 'string') {
+            herramientaData.fecha_r = new Date(herramientaData.fecha_r);
+        }
+        if (herramientaData.fecha_calibrado && typeof herramientaData.fecha_calibrado === 'string') {
+            herramientaData.fecha_calibrado = new Date(herramientaData.fecha_calibrado);
+        }
+        if (herramientaData.fecha_pendiente && typeof herramientaData.fecha_pendiente === 'string') {
+            herramientaData.fecha_pendiente = new Date(herramientaData.fecha_pendiente);
+        }
+        
+        // Convertir calibrado a boolean si es string
+        if (typeof herramientaData.calibrado === 'string') {
+            herramientaData.calibrado = herramientaData.calibrado === 'true';
+        }
+        
+        // Convertir num_partida y numero_serie a números si son strings
+        if (typeof herramientaData.num_partida === 'string') {
+            herramientaData.num_partida = parseInt(herramientaData.num_partida);
+        }
+        if (typeof herramientaData.numero_serie === 'string') {
+            herramientaData.numero_serie = parseInt(herramientaData.numero_serie);
+        }
+        
+        console.log('Datos a insertar:', herramientaData);
+        
+        const nuevaHerramienta = await Inventario.create(herramientaData);
+        console.log('Herramienta insertada:', nuevaHerramienta);
+        
+        return nuevaHerramienta;
+    } catch (error) {
+        console.error('Error al insertar herramienta:', error);
+        throw error;
+    }
 };
 
 InventarioDAO.getAll = async () => {

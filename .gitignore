@@ -135,3 +135,13 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .qodo
+
+# Imágenes subidas - excluir archivos de imagen pero mantener la carpeta
+src/uploads/*.jpg
+src/uploads/*.jpeg
+src/uploads/*.png
+src/uploads/*.gif
+src/uploads/*.webp
+src/uploads/*.svg
+src/uploads/*.bmp
+src/uploads/*.tiff

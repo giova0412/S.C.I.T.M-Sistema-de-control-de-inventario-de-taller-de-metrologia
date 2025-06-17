@@ -33,15 +33,35 @@ const InventarioSchema = new Schema(
     },
     calibrado: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     fecha_calibrado:{
-      type:Date,
-      required:true,
+      type: Date,
+      required: false,
     },
     fecha_pendiente:{
-      type:Date,
-      required:false,
+      type: Date,
+      required: false,
+    },
+    // Campos adicionales para calibración
+    calibracion_activa: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    fecha_calibracion: {
+      type: Date,
+      required: false,
+    },
+    estado_calibracion: {
+      type: String,
+      required: false,
+      default: 'Pendiente de calibración',
+    },
+    imagen_url: {
+      type: String,
+      required: false,
     }
   }, 
   {

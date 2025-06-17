@@ -1,0 +1,355 @@
+{
+	"info": {
+		"_postman_id": "12345678-1234-1234-1234-123456789012",
+		"name": "Inventario con Imágenes",
+		"description": "Colección para probar la funcionalidad de subida y visualización de imágenes en el inventario",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Crear Herramienta con Imagen",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "id_herramienta",
+							"value": "12345",
+							"type": "text"
+						},
+						{
+							"key": "nombre_herramienta",
+							"value": "Calibrador Digital",
+							"type": "text"
+						},
+						{
+							"key": "num_partida",
+							"value": "12345",
+							"type": "text"
+						},
+						{
+							"key": "numero_serie",
+							"value": "67890",
+							"type": "text"
+						},
+						{
+							"key": "fecha_r",
+							"value": "2024-01-15",
+							"type": "text"
+						},
+						{
+							"key": "dep",
+							"value": "Metrología",
+							"type": "text"
+						},
+						{
+							"key": "medida",
+							"value": "mm",
+							"type": "text"
+						},
+						{
+							"key": "calibrado",
+							"value": "true",
+							"type": "text"
+						},
+						{
+							"key": "fecha_calibrado",
+							"value": "2024-01-15",
+							"type": "text"
+						},
+						{
+							"key": "imagen",
+							"type": "file",
+							"src": []
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/inventario",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"inventario"
+					]
+				},
+				"description": "Crear una nueva herramienta con imagen adjunta. El campo id_herramienta es OBLIGATORIO."
+			}
+		},
+		{
+			"name": "Crear Herramienta sin Imagen",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "id_herramienta",
+							"value": "12346",
+							"type": "text"
+						},
+						{
+							"key": "nombre_herramienta",
+							"value": "Calibrador sin Imagen",
+							"type": "text"
+						},
+						{
+							"key": "num_partida",
+							"value": "12346",
+							"type": "text"
+						},
+						{
+							"key": "numero_serie",
+							"value": "67891",
+							"type": "text"
+						},
+						{
+							"key": "fecha_r",
+							"value": "2024-01-15",
+							"type": "text"
+						},
+						{
+							"key": "dep",
+							"value": "Metrología",
+							"type": "text"
+						},
+						{
+							"key": "medida",
+							"value": "mm",
+							"type": "text"
+						},
+						{
+							"key": "calibrado",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/inventario",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"inventario"
+					]
+				},
+				"description": "Crear una nueva herramienta sin imagen. El campo id_herramienta es OBLIGATORIO."
+			}
+		},
+		{
+			"name": "Obtener Todas las Herramientas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/inventario",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"inventario"
+					]
+				},
+				"description": "Obtener todas las herramientas con URLs de imágenes"
+			}
+		},
+		{
+			"name": "Obtener Herramienta Específica",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/inventario/{{herramienta_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"inventario",
+						"{{herramienta_id}}"
+					]
+				},
+				"description": "Obtener una herramienta específica por ID"
+			}
+		},
+		{
+			"name": "Actualizar Imagen de Herramienta",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "imagen",
+							"type": "file",
+							"src": []
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/inventario/{{herramienta_id}}/imagen",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"inventario",
+						"{{herramienta_id}}",
+						"imagen"
+					]
+				},
+				"description": "Actualizar la imagen de una herramienta existente"
+			}
+		},
+		{
+			"name": "Ver Imagen",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/inventario/imagen/{{imagen_filename}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"inventario",
+						"imagen",
+						"{{imagen_filename}}"
+					]
+				},
+				"description": "Ver una imagen específica por nombre de archivo"
+			}
+		},
+		{
+			"name": "Actualizar Herramienta (sin imagen)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"nombre_herramienta\": \"Calibrador Digital Actualizado\",\n  \"dep\": \"Metrología Avanzada\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/inventario/{{herramienta_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"inventario",
+						"{{herramienta_id}}"
+					]
+				},
+				"description": "Actualizar datos de una herramienta sin cambiar la imagen"
+			}
+		},
+		{
+			"name": "Eliminar Herramienta",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/inventario/{{herramienta_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"inventario",
+						"{{herramienta_id}}"
+					]
+				},
+				"description": "Eliminar una herramienta del inventario"
+			}
+		},
+		{
+			"name": "Prueba Error - Sin ID",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "nombre_herramienta",
+							"value": "Herramienta sin ID",
+							"type": "text"
+						},
+						{
+							"key": "num_partida",
+							"value": "99999",
+							"type": "text"
+						},
+						{
+							"key": "numero_serie",
+							"value": "99999",
+							"type": "text"
+						},
+						{
+							"key": "fecha_r",
+							"value": "2024-01-15",
+							"type": "text"
+						},
+						{
+							"key": "dep",
+							"value": "Prueba",
+							"type": "text"
+						},
+						{
+							"key": "medida",
+							"value": "mm",
+							"type": "text"
+						},
+						{
+							"key": "calibrado",
+							"value": "false",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/inventario",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"inventario"
+					]
+				},
+				"description": "Prueba para verificar que se requiere el campo id_herramienta. Debe devolver error 400."
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "herramienta_id",
+			"value": "12345",
+			"type": "string"
+		},
+		{
+			"key": "imagen_filename",
+			"value": "imagen-1234567890.jpg",
+			"type": "string"
+		}
+	]
+} 
