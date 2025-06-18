@@ -13,7 +13,8 @@ loginController.register = (req, res) => {
     loginDAO.findByNombre(nombre)
         .then((existingUser) => {
             if (existingUser) {
-                return res.status(400).json({ message: "El usuario ya existe 😥" });
+                res.status(400).json({ message: "El usuario ya existe 😥" });
+                return null;
             }
             return loginDAO.insert({ nombre, email, password });
         })
@@ -23,7 +24,9 @@ loginController.register = (req, res) => {
             }
         })
         .catch((error) => {
-            res.status(500).json({ message: error.message });
+            if (!res.headersSent) {
+                res.status(500).json({ message: error.message });
+            }
         });
 };
 
@@ -35,7 +38,8 @@ loginController.login = (req, res) => {
     loginDAO.findByNombre(nombre)
         .then((user) => {
             if (!user || user.password !== password) {
-                return res.status(401).json({ message: "Credenciales inválidas 🙄" });
+                res.status(401).json({ message: "Credenciales inválidas 🙄" });
+                return null;
             }
             // Marcar sesión como abierta
             return loginDAO.setSesionAbierta(user._id, true).then(() => user);
@@ -46,7 +50,9 @@ loginController.login = (req, res) => {
             }
         })
         .catch((error) => {
-            res.status(500).json({ message: error.message });
+            if (!res.headersSent) {
+                res.status(500).json({ message: error.message });
+            }
         });
 };
 
@@ -88,8 +94,9 @@ loginController.recuperarPassword = async (req, res) => {
 
     res.json({ message: "Correo de recuperación enviado" });
   } catch (error) {
-    console.error("Error en recuperación:", error);
-    res.status(500).json({ message: "Error al procesar la solicitud" });
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Error al procesar la solicitud" });
+    }
   }
 };
 

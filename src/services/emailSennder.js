@@ -9,9 +9,13 @@ export async function enviarCorreoRecuperacion(email, token) {
     to: email,
     subject: 'Recuperación de contraseña',
     html: `
-      <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-      <a href="${resetLink}">${resetLink}</a>
-      <p>Este enlace caduca en 15 minutos.</p>
+      <div style="font-family: Arial, sans-serif; color: #222; background: #f7f7f7; padding: 24px; border-radius: 8px; max-width: 480px; margin: auto;">
+        <h2 style="color: #006341;">Recuperación de contraseña</h2>
+        <p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el botón para continuar:</p>
+        <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background: #d0021b; color: #fff; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 16px 0;">Cambiar contraseña</a>
+        <p>Si no solicitaste este cambio, puedes ignorar este correo.</p>
+        <p style="font-size: 13px; color: #888;">Este enlace caduca en 15 minutos.</p>
+      </div>
     `,
   });
 
