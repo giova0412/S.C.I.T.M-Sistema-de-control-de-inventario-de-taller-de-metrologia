@@ -4,6 +4,7 @@ import Register from './Register';
 import Herramientas from './Herramientas';
 import Reportes from './Reportes';
 import Recup from './Recup';
+import ResetPassword from './ResetPassword';
 
 function AppRouter() {
   return (
@@ -14,6 +15,7 @@ function AppRouter() {
       <Route path="/herramientas" element={<Herramientas />} />
       <Route path="/reportes" element={<Reportes />} />
       <Route path='/recovery' element={<Recup/>}/>
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="*" element={<h1>404 - Página no encontrada</h1>} />
     </Routes>
   );
