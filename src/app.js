@@ -7,11 +7,11 @@ import reportesRoutes from "./routes/reportes.routes.js";
 
 const app = express();
 //configuracion de puerto
-app.set('port',process.env.PORT||3000);
+app.set('port',process.env.PORT||3001);
 
 // Configuración de CORS más específica y robusta
 app.use(cors({
-    origin: ['http://localhost:3002', 'http://localhost:5173', 'http://localhost:3000'],
+    origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:5173'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
