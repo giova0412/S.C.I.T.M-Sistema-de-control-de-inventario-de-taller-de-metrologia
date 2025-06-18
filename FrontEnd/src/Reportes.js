@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate }  from "react-router-dom";
+import { reportesService } from "./api/reportesService.js";
+import { herramientasService } from "./api/herramientasService.js";
 
 const Reportes = () => {
     // Estado para lista de reportes
     const [reportes, setReportes] = useState([]);
+    const [herramientas, setHerramientas] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -11,10 +16,50 @@ const Reportes = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [tab, setTab] = useState("all");
     const [editingReporte, setEditingReporte] = useState(null);
+    const [selectedHerramienta, setSelectedHerramienta] = useState(null);
+    
+    // Cargar reportes y herramientas al montar el componente
+    useEffect(() => {
+        loadReportes();
+        loadHerramientas();
+    }, []);
+
+    const loadReportes = async () => {
+        try {
+            setLoading(true);
+            const data = await reportesService.getAll();
+            setReportes(data);
+            setError(null);
+        } catch (err) {
+            console.error('Error al cargar reportes:', err);
+            setError('Error al cargar los reportes. Por favor, intenta de nuevo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadHerramientas = async () => {
+        try {
+            const data = await herramientasService.getAll();
+            setHerramientas(data);
+        } catch (err) {
+            console.error('Error al cargar herramientas:', err);
+        }
+    };
+
     const handleEdit = (reporte, index) => {
-        setEditingReporte({ ...reporte, index });
+        // Convertir los datos del backend al formato del formulario
+        const reporteFormato = {
+            ...reporte,
+            ficha: reporte.ficha_trabajador || reporte._id,
+            status: reporte.estado_entrega === "Entregado" ? "Entregado" : "Pendiente",
+            fechaEntregado: reporte.fecha_entrega ? new Date(reporte.fecha_entrega).toISOString().split('T')[0] : "",
+            fechaRecibido: reporte.fecha_recibido ? new Date(reporte.fecha_recibido).toISOString().split('T')[0] : ""
+        };
+        setEditingReporte(reporteFormato);
         setEditModalOpen(true);
     };
+
     // Estado para modal y formulario
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
@@ -26,7 +71,20 @@ const Reportes = () => {
         fechaRecibido: "",
     });
 
-    const toggleModalReporte = () => setModalOpen(!modalOpen);
+    const toggleModalReporte = () => {
+        setModalOpen(!modalOpen);
+        if (modalOpen) {
+            setForm({
+                nombre: "",
+                ficha: "",
+                status: "Pendiente",
+                fechaEntregado: "",
+                fechaRecibido: "",
+            });
+            setSelectedHerramienta(null);
+        }
+    };
+
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
     };
@@ -38,50 +96,164 @@ const Reportes = () => {
     };
 
     // Enviar formulario
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         // Validación simple
-        if (!form.nombre || !form.ficha) {
-            alert("Completa nombre y ficha");
+        if (!form.nombre || !form.ficha || !selectedHerramienta) {
+            alert("Completa nombre, ficha y selecciona una herramienta");
             return;
         }
-        setReportes((prev) => [...prev, form]);
-        setForm({
-            nombre: "",
-            ficha: "",
-            status: "Pendiente",
-            fechaEntregado: "",
-            fechaRecibido: "",
-        });
-        toggleModalReporte();
+        try {
+            // Crear el reporte con los datos del modelo del backend
+            const reporteData = {
+                ficha_trabajador: parseInt(form.ficha),
+                nombre: form.nombre,
+                id_herramienta: selectedHerramienta._id,
+                fecha_recibido: form.fechaRecibido ? new Date(form.fechaRecibido) : new Date(),
+                fecha_entrega: form.fechaEntregado ? new Date(form.fechaEntregado) : new Date(),
+                estado_entrega: form.status === "Entregado" ? "Entregado" : "pendiente"
+            };
+
+            await reportesService.create(reporteData);
+            await loadReportes(); // Recargar datos
+            setForm({
+                nombre: "",
+                ficha: "",
+                status: "Pendiente",
+                fechaEntregado: "",
+                fechaRecibido: "",
+            });
+            setSelectedHerramienta(null);
+            toggleModalReporte();
+        } catch (err) {
+            console.error('Error al crear reporte:', err);
+            alert('Error al crear el reporte');
+        }
     };
+
     // Editar reporte
-    const handleEditSubmit = (e) => {
-        const newReportes = [...reportes];
-        newReportes[editingReporte.index] = {
-            nombre: editingReporte.nombre,
-            ficha: editingReporte.ficha,
-            status: editingReporte.status,
-            fechaEntregado: editingReporte.fechaEntregado,
-            fechaRecibido: editingReporte.fechaRecibido
-        };
-        setReportes(newReportes);
-        setEditModalOpen(false);
-        setEditingReporte(null);
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            // Convertir los datos del formulario al formato del backend
+            const reporteData = {
+                nombre: editingReporte.nombre,
+                ficha_trabajador: parseInt(editingReporte.ficha),
+                fecha_recibido: editingReporte.fechaRecibido ? new Date(editingReporte.fechaRecibido) : new Date(),
+                fecha_entrega: editingReporte.fechaEntregado ? new Date(editingReporte.fechaEntregado) : new Date(),
+                estado_entrega: editingReporte.status === "Entregado" ? "Entregado" : "pendiente"
+            };
+
+            await reportesService.update(editingReporte.ficha, reporteData);
+            await loadReportes(); // Recargar datos
+            setEditModalOpen(false);
+            setEditingReporte(null);
+        } catch (err) {
+            console.error('Error al actualizar reporte:', err);
+            alert('Error al actualizar el reporte');
+        }
+    };
+
+    // Eliminar reporte
+    const handleDelete = async (ficha) => {
+        if (window.confirm('¿Estás seguro de que quieres eliminar este reporte?')) {
+            try {
+                await reportesService.delete(ficha);
+                await loadReportes(); // Recargar datos
+            } catch (err) {
+                console.error('Error al eliminar reporte:', err);
+                alert('Error al eliminar el reporte');
+            }
+        }
+    };
+
+    // Descargar PDF
+    const handleDownloadPDF = async () => {
+        try {
+            const blob = await reportesService.downloadPDF();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'reportes.pdf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (err) {
+            console.error('Error al descargar PDF:', err);
+            alert('Error al descargar el PDF');
+        }
     };
 
     // Filtrar reportes según tab y búsqueda
     const filteredReportes = reportes.filter((r) => {
         const matchesTab =
             tab === "all" ||
-            (tab === "monitored" && r.status === "Pendiente") ||
-            (tab === "unmonitored" && r.status === "Entregado");
+            (tab === "monitored" && r.estado_entrega === "pendiente") ||
+            (tab === "unmonitored" && r.estado_entrega === "Entregado");
         const matchesSearch =
             r.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            r.ficha.toLowerCase().includes(searchTerm.toLowerCase());
+            (r.ficha_trabajador || r._id).toString().includes(searchTerm.toLowerCase());
 
         return matchesTab && matchesSearch;
     });
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+                <div className="text-center">
+                    {/* Spinner animado */}
+                    <div className="relative mb-8">
+                        <div className="w-16 h-16 border-4 border-pemex-green border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <div className="absolute inset-0 w-16 h-16 border-4 border-blue-500 border-b-transparent rounded-full animate-ping opacity-20"></div>
+                    </div>
+                    
+                    {/* Texto de carga */}
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Cargando Reportes</h2>
+                    <p className="text-gray-600 text-lg">Por favor espera mientras se cargan los datos...</p>
+                    
+                    {/* Puntos animados */}
+                    <div className="flex justify-center mt-4 space-x-1">
+                        <div className="w-2 h-2 bg-pemex-green rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-pemex-green rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-pemex-green rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-red-100">
+                <div className="text-center max-w-md mx-auto p-8">
+                    {/* Icono de error */}
+                    <div className="mb-6">
+                        <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    {/* Mensaje de error */}
+                    <h2 className="text-2xl font-bold text-red-800 mb-4">Error al Cargar Reportes</h2>
+                    <p className="text-red-600 mb-6 leading-relaxed">{error}</p>
+                    
+                    {/* Botón de reintentar */}
+                    <button 
+                        onClick={loadReportes}
+                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                    >
+                        <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Reintentar
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className=" h-screen bg-gray-100">
@@ -138,6 +310,12 @@ const Reportes = () => {
                             <path d="M6.25 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM3.25 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM19.75 7.5a.75.75 0 00-1.5 0v2.25H16a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H22a.75.75 0 000-1.5h-2.25V7.5z"></path>
                         </svg>
                         Agrega un Reporte
+                    </button>
+                    <button onClick={handleDownloadPDF} className="andform hover:scale-100 transition-all duration-500 flex select-none items-center gap-3 rounded-lg bg-blue-600 py-2 px-4 text-center align-middle font-sans text-xs font-bold uppercase text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                        Descargar PDF
                     </button>
                 </div>
 
@@ -206,6 +384,14 @@ const Reportes = () => {
                                 </th>
                                 <th className="border-b border-blue-gray-200 bg-pemex-green p-5 transition-colors hover:bg-pemex-dark-green">
                                     <div className="flex items-center justify-between gap-2 font-sans text-sm font-bold uppercase tracking-wide text-white">
+                                        Herramienta
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th className="border-b border-blue-gray-200 bg-pemex-green p-5 transition-colors hover:bg-pemex-dark-green">
+                                    <div className="flex items-center justify-between gap-2 font-sans text-sm font-bold uppercase tracking-wide text-white">
                                         Status
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 opacity-70">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
@@ -240,20 +426,21 @@ const Reportes = () => {
                         </thead>
                         <tbody>
                             {filteredReportes.length === 0 ? (
-                                <tr><td colSpan={5} className="text-center p-4 text-pemex-green font-bold"> No hay reportes para mostrar</td></tr>
+                                <tr><td colSpan={7} className="text-center p-4 text-pemex-green font-bold"> No hay reportes para mostrar</td></tr>
                             ) : (
                                 filteredReportes.map((reporte, index) => (
                                     <tr key={index} className={`border border-blue-gray-50 ${index % 2 === 0 ? "bg-pemex-green/10" : "bg-white"}`}>
                                         <td className="p-4 capitalize">{reporte.nombre}</td>
-                                        <td className="p-4">{reporte.ficha}</td>
+                                        <td className="p-4">{reporte.ficha_trabajador || reporte._id}</td>
+                                        <td className="p-4 capitalize">{reporte.nombre_herramienta || 'No disponible'}</td>
                                         <td className="p-4">
-                                            <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${reporte.status === "Pendiente"? "bg-red-100 text-red-800": "bg-green-100 text-green-800"} transition-all duration-300 hover:scale-105`}>
-                                                <span className={`w-2 h-2 mr-2 rounded-full ${reporte.status === "Pendiente" ? "bg-red-500": "bg-green-500"}`}></span>
-                                                {reporte.status}
+                                            <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${reporte.estado_entrega === "pendiente"? "bg-red-100 text-red-800": "bg-green-100 text-green-800"} transition-all duration-300 hover:scale-105`}>
+                                                <span className={`w-2 h-2 mr-2 rounded-full ${reporte.estado_entrega === "pendiente" ? "bg-red-500": "bg-green-500"}`}></span>
+                                                {reporte.estado_entrega}
                                             </span>
                                         </td>
-                                        <td className="p-4">{reporte.fechaEntregado}</td>
-                                        <td className="p-4">{reporte.fechaRecibido}</td>
+                                        <td className="p-4">{new Date(reporte.fecha_entrega).toLocaleDateString()}</td>
+                                        <td className="p-4">{new Date(reporte.fecha_recibido).toLocaleDateString()}</td>
                                         <td className="p-4 flex gap-2">
                                             <button onClick={() => handleEdit(reporte, index)}className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-300 text-sm">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -262,7 +449,25 @@ const Reportes = () => {
                                                 Editar
                                             </button>
 
-                                            <button className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-300 text-sm">
+                                            <button 
+                                                onClick={async () => {
+                                                    try {
+                                                        const blob = await reportesService.downloadOnePDF(reporte.ficha_trabajador || reporte._id);
+                                                        const url = window.URL.createObjectURL(blob);
+                                                        const a = document.createElement('a');
+                                                        a.href = url;
+                                                        a.download = `reporte_${reporte.ficha_trabajador || reporte._id}.pdf`;
+                                                        document.body.appendChild(a);
+                                                        a.click();
+                                                        window.URL.revokeObjectURL(url);
+                                                        document.body.removeChild(a);
+                                                    } catch (err) {
+                                                        console.error('Error al descargar reporte:', err);
+                                                        alert('Error al descargar el reporte');
+                                                    }
+                                                }}
+                                                className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-300 text-sm"
+                                            >
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                                 </svg>
@@ -271,9 +476,7 @@ const Reportes = () => {
 
                                             <button
                                                 onClick={() => {
-                                                    setReportes((prev) =>
-                                                        prev.filter((_, i) => i !== index)
-                                                    );
+                                                    handleDelete(reporte.ficha_trabajador || reporte._id);
                                                 }}
                                                 className="flex items-center gap-1 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all duration-300 text-sm"
                                             >
@@ -305,31 +508,51 @@ const Reportes = () => {
 
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <label className="block">
-                                    <span className="text-pemex-green font-bold">Nombre</span>
+                                    <span className="text-pemex-green font-bold">Herramienta</span>
+                                    <select 
+                                        value={selectedHerramienta?._id || ""} 
+                                        onChange={(e) => {
+                                            const herramienta = herramientas.find(h => h._id == e.target.value);
+                                            setSelectedHerramienta(herramienta);
+                                        }}
+                                        className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" 
+                                        required
+                                    >
+                                        <option value="">Selecciona una herramienta</option>
+                                        {herramientas.map(herramienta => (
+                                            <option key={herramienta._id} value={herramienta._id}>
+                                                {herramienta.nombre_herramienta} - ID: {herramienta._id}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                <label className="block">
+                                    <span className="text-pemex-green font-bold">Nombre del Trabajador</span>
                                     <input type="text" name="nombre" value={form.nombre} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" required/>
                                 </label>
 
                                 <label className="block">
-                                    <span className="text-pemex-green font-bold">Ficha</span>
-                                    <input type="text" name="ficha" value={form.ficha} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" required/>
+                                    <span className="text-pemex-green font-bold">Ficha del Trabajador</span>
+                                    <input type="number" name="ficha" value={form.ficha} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" required/>
                                 </label>
 
                                 <label className="block">
                                     <span className="text-pemex-green font-bold">Status</span>
-                                    <select name="status" value={form.status}onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700">
+                                    <select name="status" value={form.status} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700">
                                         <option value="Pendiente">Pendiente</option>
                                         <option value="Entregado">Entregado</option>
                                     </select>
                                 </label>
 
                                 <label className="block">
-                                    <span className="text-pemex-green font-bold">Fecha entregado</span>
-                                    <input type="date" name="fechaEntregado" value={form.fechaEntregado} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"/>
+                                    <span className="text-pemex-green font-bold">Fecha Recibido</span>
+                                    <input type="date" name="fechaRecibido" value={form.fechaRecibido} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"/>
                                 </label>
 
                                 <label className="block">
-                                    <span className="text-pemex-green font-bold">Fecha recibido</span>
-                                    <input type="date" name="fechaRecibido" value={form.fechaRecibido} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"/>
+                                    <span className="text-pemex-green font-bold">Fecha Entrega</span>
+                                    <input type="date" name="fechaEntregado" value={form.fechaEntregado} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"/>
                                 </label>
 
                                 <div className="flex justify-end gap-2 pt-3">

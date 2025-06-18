@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { herramientasService } from "./api/herramientasService.js";
+import { reportesService } from "./api/reportesService.js";
 
 function Herramientas() {
   const [herramientas, setHerramientas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalOpenAgrgar, setModalOpenAgregar] = useState(false);
@@ -11,7 +15,26 @@ function Herramientas() {
   const navigate = useNavigate();
   const [editingHerramienta, setEditingHerramienta] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedHerramienta, setSelectedHerramienta] = useState(null);
 
+  // Cargar herramientas al montar el componente
+  useEffect(() => {
+    loadHerramientas();
+  }, []);
+
+  const loadHerramientas = async () => {
+    try {
+      setLoading(true);
+      const data = await herramientasService.getAll();
+      setHerramientas(data);
+      setError(null);
+    } catch (err) {
+      console.error('Error al cargar herramientas:', err);
+      setError('Error al cargar las herramientas. Por favor, intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const [form, setForm] = useState({
     nombre: "",
@@ -30,26 +53,45 @@ function Herramientas() {
       [name]: value,
     }));
   }
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.nombre || !form.ficha) {
-      alert("Por favor completa los campos nombre y ficha");
+    if (!form.nombre || !form.ficha || !selectedHerramienta) {
+      alert("Por favor completa los campos nombre, ficha y selecciona una herramienta");
       return;
     }
 
-    setReportes(prevReportes => [...prevReportes, form]);
+    try {
+      // Crear el reporte con los datos del modelo de backend
+      const reporteData = {
+        ficha_trabajador: parseInt(form.ficha),
+        nombre: form.nombre,
+        id_herramienta: selectedHerramienta._id,
+        fecha_recibido: form.fechaRecibido ? new Date(form.fechaRecibido) : new Date(),
+        fecha_entrega: form.fechaEntregado ? new Date(form.fechaEntregado) : new Date(),
+        estado_entrega: form.status === "Entregado" ? "Entregado" : "pendiente"
+      };
 
-    setForm({
-      nombre: "",
-      ficha: "",
-      status: "Pendiente",
-      fechaEntregado: "",
-      fechaRecibido: "",
-    });
-
-    toggleModalReporte();
+      await reportesService.create(reporteData);
+      
+      // Limpiar el formulario
+      setForm({
+        nombre: "",
+        ficha: "",
+        status: "Pendiente",
+        fechaEntregado: "",
+        fechaRecibido: "",
+      });
+      setSelectedHerramienta(null);
+      toggleModalReporte();
+      alert("Reporte creado exitosamente");
+    } catch (err) {
+      console.error('Error al crear reporte:', err);
+      alert('Error al crear el reporte: ' + (err.response?.data?.data?.message || err.message));
+    }
   };
+
   const toggleModalReporte = () => {
     setModalOpen(!modalOpen);
     if (modalOpen) {
@@ -60,6 +102,7 @@ function Herramientas() {
         fechaEntregado: "",
         fechaRecibido: "",
       });
+      setSelectedHerramienta(null);
     }
   };
 
@@ -69,25 +112,121 @@ function Herramientas() {
   setEditModalOpen(true);
 };
   const [nuevaHerramienta, setNuevaHerramienta] = useState({
-    nombre: "",
-    aid: "",
-    partida: "",
-    fecha: "",
-    depto: "",
+    nombre_herramienta: "",
+    num_partida: "",
+    numero_serie: "",
+    fecha_r: "",
+    dep: "",
     medida: "",
   });
   const [nuevaFoto, setNuevaFoto] = useState(null);
-  const handleEditSubmit = (e) => {
+
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
+    try {
+      await herramientasService.update(editingHerramienta._id, editingHerramienta);
+      await loadHerramientas(); // Recargar datos
+      setEditModalOpen(false);
+      setEditingHerramienta(null);
+    } catch (err) {
+      console.error('Error al actualizar herramienta:', err);
+      alert('Error al actualizar la herramienta');
+    }
+  };
 
-    setHerramientas((prev) =>
-      prev.map((herramienta) =>
-        herramienta.aid === editingHerramienta.aid ? editingHerramienta : herramienta
-      )
-    );
+  const handleCreateHerramienta = async (e) => {
+    e.preventDefault();
+    try {
+      // Preparar los datos según el modelo del backend
+      const herramientaData = {
+        nombre_herramienta: nuevaHerramienta.nombre_herramienta,
+        num_partida: parseInt(nuevaHerramienta.num_partida),
+        numero_serie: parseInt(nuevaHerramienta.numero_serie),
+        fecha_r: new Date(nuevaHerramienta.fecha_r),
+        dep: nuevaHerramienta.dep,
+        medida: nuevaHerramienta.medida,
+        calibrado: false,
+        calibracion_activa: false,
+        estado_calibracion: 'Pendiente de calibración'
+      };
 
-    setEditModalOpen(false);
-    setEditingHerramienta(null);
+      // Si hay imagen, agregarla
+      if (nuevaFoto) {
+        herramientaData.imagen = nuevaFoto;
+      }
+
+      await herramientasService.create(herramientaData);
+      await loadHerramientas(); // Recargar datos
+      setNuevaHerramienta({
+        nombre_herramienta: "",
+        num_partida: "",
+        numero_serie: "",
+        fecha_r: "",
+        dep: "",
+        medida: "",
+      });
+      setNuevaFoto(null);
+      toggleModalAgregar();
+      alert("Herramienta creada exitosamente");
+    } catch (err) {
+      console.error('Error al crear herramienta:', err);
+      alert('Error al crear la herramienta: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta herramienta?')) {
+      try {
+        await herramientasService.delete(id);
+        await loadHerramientas(); // Recargar datos
+      } catch (err) {
+        console.error('Error al eliminar herramienta:', err);
+        alert('Error al eliminar la herramienta');
+      }
+    }
+  };
+
+  // Función para descargar reporte individual de una herramienta
+  const handleDownloadReporte = async (herramienta) => {
+    try {
+      const blob = await herramientasService.downloadPDF(herramienta._id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `herramienta_${herramienta._id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Error al descargar reporte:', err);
+      alert('Error al descargar el reporte: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
+  // Función para crear reporte desde una herramienta
+  const handleCreateReporte = async (herramienta) => {
+    try {
+      // Crear datos del reporte basados en la herramienta
+      const reporteData = {
+        ficha_trabajador: parseInt(herramienta.num_partida),
+        nombre: herramienta.nombre_herramienta,
+        id_herramienta: herramienta._id,
+        fecha_recibido: new Date(),
+        fecha_entrega: new Date(),
+        estado_entrega: "pendiente"
+      };
+
+      // Crear el reporte usando el servicio
+      await reportesService.create(reporteData);
+      alert('Reporte creado exitosamente');
+      
+      // Opcional: navegar a la página de reportes
+      navigate('/reportes');
+    } catch (err) {
+      console.error('Error al crear reporte:', err);
+      alert('Error al crear el reporte: ' + (err.response?.data?.message || err.message));
+    }
   };
 
   const toggleSidebar = () => {
@@ -100,15 +239,70 @@ function Herramientas() {
     setModalOpenAgregar(!modalOpenAgrgar);
   };
 
-  const handleDelete = (id) => {
-    setHerramientas((prev) => prev.filter((herramienta) => herramienta.id !== id));
-  };
   const herramientasParaMostrar = searchTerm.trim()
   ? herramientas.filter((herramienta) =>
-      herramienta.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      herramienta.aid.toString().includes(searchTerm)
+      herramienta.nombre_herramienta?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      herramienta.num_partida?.toString().includes(searchTerm)
     )
   : herramientas;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pemex-green to-pemex-dark-green">
+        <div className="text-center">
+          {/* Spinner animado */}
+          <div className="relative mb-8">
+            <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 w-16 h-16 border-4 border-pemex-green border-b-transparent rounded-full animate-ping opacity-20"></div>
+          </div>
+          
+          {/* Texto de carga */}
+          <h2 className="text-2xl font-bold text-white mb-2">Cargando Herramientas</h2>
+          <p className="text-white/80 text-lg">Por favor espera mientras se cargan los datos...</p>
+          
+          {/* Puntos animados */}
+          <div className="flex justify-center mt-4 space-x-1">
+            <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+            <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-red-100">
+        <div className="text-center max-w-md mx-auto p-8">
+          {/* Icono de error */}
+          <div className="mb-6">
+            <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+          </div>
+          
+          {/* Mensaje de error */}
+          <h2 className="text-2xl font-bold text-red-800 mb-4">Error al Cargar</h2>
+          <p className="text-red-600 mb-6 leading-relaxed">{error}</p>
+          
+          {/* Botón de reintentar */}
+          <button 
+            onClick={loadHerramientas}
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex bg-gray-100">
       {/* Sidebar */}
@@ -175,61 +369,91 @@ function Herramientas() {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pemex-gree focus:border-pemex-green transition duration-300 placeholder-gray-400 hover:border-pemex-green" />
           </div>
 
-          <div className="grid grid-cols-4 gap-4 p-4 ">{herramientasParaMostrar.map((herramienta, index) => (
-            <div  key={`${herramienta.aid}-${index}`} className="flex-shrink-0 w-90 cursor-pointer group relative flex flex-col my-6 bg-white shadow-md border border-slate-200 rounded-lg hover:shadow-lg transition-shadow duration-300">
-              <div className="relative h-56 m-2.5 overflow-hidden text-white rounded-md ">
-                <div className="relative h-52 overflow-hidden">
-                  <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={herramienta.foto} alt={herramienta.nombre} />
-                </div>
-              </div>
-              <div className="p-4">
-                <h6 className="mb-2 text-slate-800 text-xl font-bold"> {herramienta.nombre} </h6>
-                <div className="flex flex-col space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 font-medium">ID:</span>
-                    <span className="text-slate-600">{herramienta.aid}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 font-medium">Partida:</span>
-                    <span className="text-slate-600">{herramienta.partida}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 font-medium">Fecha:</span>
-                    <span className="text-slate-600">{herramienta.fecha}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 font-medium">Depto:</span>
-                    <span className="text-slate-600">{herramienta.depto}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 font-medium">medida:</span>
-                    <span className="text-slate-600">{herramienta.medida}</span>
+          <div className="grid grid-cols-4 gap-4 p-4">
+            {herramientasParaMostrar.map((herramienta, index) => (
+              <div key={`${herramienta._id}-${index}`} className="flex-shrink-0 w-90 cursor-pointer group relative flex flex-col my-6 bg-white shadow-md border border-slate-200 rounded-lg hover:shadow-lg transition-shadow duration-300">
+                <div className="relative h-56 m-2.5 overflow-hidden text-white rounded-md ">
+                  <div className="relative h-52 overflow-hidden">
+                    <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={herramienta.imagen_url || 'https://via.placeholder.com/300x200?text=Sin+Imagen'} alt={herramienta.nombre_herramienta} />
                   </div>
                 </div>
-                <div className="px-4 pt-2">
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-checked:bg-green-500 rounded-full relative after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:bg-white after:rounded-full after:transition-transform peer-checked:after:translate-x-full"></div>
-                    <span className="text-sm text-gray-700">Calibrado</span>
-                  </label>
+                <div className="p-4">
+                  <h6 className="mb-2 text-slate-800 text-xl font-bold"> {herramienta.nombre_herramienta} </h6>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 font-medium">ID:</span>
+                      <span className="text-slate-600">{herramienta._id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 font-medium">Partida:</span>
+                      <span className="text-slate-600">{herramienta.num_partida}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 font-medium">Serie:</span>
+                      <span className="text-slate-600">{herramienta.numero_serie}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 font-medium">Fecha:</span>
+                      <span className="text-slate-600">{new Date(herramienta.fecha_r).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 font-medium">Depto:</span>
+                      <span className="text-slate-600">{herramienta.dep}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 font-medium">Medida:</span>
+                      <span className="text-slate-600">{herramienta.medida}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 font-medium">Estado:</span>
+                      <span className={`text-sm font-medium ${herramienta.estado_calibracion === 'Calibrado' ? 'text-green-600' : 'text-orange-600'}`}>
+                        {herramienta.estado_calibracion || 'Pendiente de calibración'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="px-4 pt-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={herramienta.calibracion_activa || false}
+                        onChange={async (e) => {
+                          try {
+                            await herramientasService.updateCalibracion(herramienta._id, {
+                              calibracion_activa: e.target.checked
+                            });
+                            await loadHerramientas(); // Recargar datos
+                          } catch (err) {
+                            console.error('Error al actualizar calibración:', err);
+                            alert('Error al actualizar el estado de calibración');
+                          }
+                        }}
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-checked:bg-green-500 rounded-full relative after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:bg-white after:rounded-full after:transition-transform peer-checked:after:translate-x-full"></div>
+                      <span className="text-sm text-gray-700">Calibrado</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 px-4 pt-4 pb-6 border-t">
+                  <button onClick={() => handleEditClick(herramienta)} className="bg-pemex-green hover:bg-pemex-dark-green text-white text-sm py-2 rounded-md hover:animate-pulseLight  transition-all duration-300">Editar</button>
+                  <button onClick={() => handleDownloadReporte(herramienta)} className="bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 rounded-md transition-all duration-300 hover:animate-downloadBounce active:animate-downloadPulse shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                    <span>Descargar</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </button>
+                  <button onClick={() => handleDelete(herramienta._id)} className="bg-red-500 hover:bg-red-600 text-white text-sm py-2 rounded-md hover:animate-shake transition-all duration-300">Eliminar
+                    <svg className="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                  <button onClick={() => {
+                    setSelectedHerramienta(herramienta);
+                    toggleModalReporte();
+                  }} className="bg-gray-500 hover:bg-gray-700 text-white text-sm py-2 rounded-md transition-transform hover:scale-105">Reporte</button>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2 px-4 pt-4 pb-6 border-t">
-                <button onClick={() => handleEditClick(herramienta)} className="bg-pemex-green hover:bg-pemex-dark-green text-white text-sm py-2 rounded-md hover:animate-pulseLight  transition-all duration-300">Editar</button>
-                <button onClick={() => { /* función descarga */ }} className="bg-blue-500 hover:bg-blue-700 text-white text-sm py-2 rounded-md transition-all duration-300 hover:animate-downloadBounce active:animate-downloadPulse shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-                  <span>Descargar</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </button>
-                <button onClick={() => handleDelete(herramienta.id)} className="bg-red-500 hover:bg-red-600 text-white text-sm py-2 rounded-md hover:animate-shake transition-all duration-300">Eliminar
-                  <trash2 className="w-4 h-4" />
-                </button>
-
-                <button onClick={toggleModal} className="bg-gray-500 hover:bg-gray-700 text-white text-sm py-2 rounded-md transition-transform hover:scale-105">Reporte</button>
-              </div>
-            </div>
-          ))}
+            ))}
           </div>
           <button onClick={toggleModalAgregar} className="fixed bottom-6 right-6 z-50 rounded-full bg-green-500  text-white py-3 px-5 shadow-lg hover:bg-green-700 transition-all duration-300 hover:animate-float flex " type="button">+</button>
           {modalOpenAgrgar && (
@@ -237,40 +461,13 @@ function Herramientas() {
               <div className="bg-white rounded-xl p-8 w-70   max-w-md shadow-2xl  nimate-[slideIn_0.35s_ease-out] transform transition-transform duration-300 hover:scale-[1.015] overflow-y-auto max-h-screen" >
                 <h2 className="text-3xl font-extrabold text-center text-pemex-green mb-8 tracking-wide">Agregar Nueva Herramienta</h2>
 
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  if (
-                    !nuevaHerramienta.nombre ||
-                    !nuevaHerramienta.aid ||
-                    !nuevaHerramienta.partida ||
-                    !nuevaHerramienta.fecha ||
-                    !nuevaHerramienta.depto ||
-                    !nuevaHerramienta.medida ||
-                    !nuevaFoto
-                  ) {
-                    alert("Por favor completa todos los campos.");
-                    return;
-                  } setHerramientas([
-                    ...herramientas,
-                    { ...nuevaHerramienta, foto: URL.createObjectURL(nuevaFoto) },
-                  ]); setNuevaHerramienta({
-                    nombre: "",
-                    aid: "",
-                    partida: "",
-                    fecha: "",
-                    depto: "",
-                    medida: "",
-
-                  });
-                  setNuevaFoto(null);
-                  toggleModalAgregar();
-                }} className="space-y-6">
+                <form onSubmit={handleCreateHerramienta} className="space-y-6">
                   {[
-                    { type: "text", placeholder: "Nombre", name: "nombre", value: nuevaHerramienta.nombre },
-                    { type: "number", placeholder: "ID", name: "aid", value: nuevaHerramienta.aid },
-                    { type: "text", placeholder: "Partida", name: "partida", value: nuevaHerramienta.partida },
-                    { type: "date", placeholder: "Fecha", name: "fecha", value: nuevaHerramienta.fecha },
-                    { type: "text", placeholder: "Departamento", name: "depto", value: nuevaHerramienta.depto },
+                    { type: "text", placeholder: "Nombre de la Herramienta", name: "nombre_herramienta", value: nuevaHerramienta.nombre_herramienta },
+                    { type: "number", placeholder: "ID de Herramienta", name: "num_partida", value: nuevaHerramienta.num_partida },
+                    { type: "number", placeholder: "Número de Serie", name: "numero_serie", value: nuevaHerramienta.numero_serie },
+                    { type: "date", placeholder: "Fecha de Registro", name: "fecha_r", value: nuevaHerramienta.fecha_r },
+                    { type: "text", placeholder: "Departamento", name: "dep", value: nuevaHerramienta.dep },
                     { type: "text", placeholder: "Medida", name: "medida", value: nuevaHerramienta.medida },
                   ].map(({ type, placeholder, name, value }) => (
                     <input key={name} type={type} name={name} placeholder={placeholder} value={value} onChange={(e) =>
@@ -358,11 +555,11 @@ function Herramientas() {
                 {/* NOMBRE */}
                 <input
                   type="text"
-                  name="nombre"
+                  name="nombre_herramienta"
                   placeholder="Nombre"
-                  value={editingHerramienta.nombre}
+                  value={editingHerramienta.nombre_herramienta}
                   onChange={(e) =>
-                    setEditingHerramienta((prev) => ({ ...prev, nombre: e.target.value }))
+                    setEditingHerramienta((prev) => ({ ...prev, nombre_herramienta: e.target.value }))
                   }
                   required
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pemex-green focus:border-pemex-green transition-colors duration-300 hover:border-pemex-green shadow-sm text-gray-800 font-medium"
@@ -371,11 +568,11 @@ function Herramientas() {
                 {/* ID (solo‑lectura) */}
                 <input
                   type="number"
-                  name="aid"
+                  name="num_partida"
                   placeholder="ID"
-                  value={editingHerramienta.aid}
+                  value={editingHerramienta.num_partida}
                   onChange={(e) =>
-                    setEditingHerramienta((prev) => ({ ...prev, aid: e.target.value }))
+                    setEditingHerramienta((prev) => ({ ...prev, num_partida: e.target.value }))
                   }
                   className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pemex-green focus:border-pemex-green transition-colors duration-300 hover:border-pemex-green shadow-sm text-gray-800 font-medium"
                 />
@@ -383,11 +580,11 @@ function Herramientas() {
                 {/* PARTIDA */}
                 <input
                   type="text"
-                  name="partida"
+                  name="numero_serie"
                   placeholder="Partida"
-                  value={editingHerramienta.partida}
+                  value={editingHerramienta.numero_serie}
                   onChange={(e) =>
-                    setEditingHerramienta((prev) => ({ ...prev, partida: e.target.value }))
+                    setEditingHerramienta((prev) => ({ ...prev, numero_serie: e.target.value }))
                   }
                   required
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pemex-green focus:border-pemex-green transition-colors duration-300 hover:border-pemex-green shadow-sm text-gray-800 font-medium"
@@ -396,11 +593,11 @@ function Herramientas() {
                 {/* FECHA */}
                 <input
                   type="date"
-                  name="fecha"
+                  name="fecha_r"
                   placeholder="Fecha"
-                  value={editingHerramienta.fecha}
+                  value={editingHerramienta.fecha_r}
                   onChange={(e) =>
-                    setEditingHerramienta((prev) => ({ ...prev, fecha: e.target.value }))
+                    setEditingHerramienta((prev) => ({ ...prev, fecha_r: e.target.value }))
                   }
                   required
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pemex-green focus:border-pemex-green transition-colors duration-300 hover:border-pemex-green shadow-sm text-gray-800 font-medium"
@@ -409,11 +606,11 @@ function Herramientas() {
                 {/* DEPTO */}
                 <input
                   type="text"
-                  name="depto"
+                  name="dep"
                   placeholder="Departamento"
-                  value={editingHerramienta.depto}
+                  value={editingHerramienta.dep}
                   onChange={(e) =>
-                    setEditingHerramienta((prev) => ({ ...prev, depto: e.target.value }))
+                    setEditingHerramienta((prev) => ({ ...prev, dep: e.target.value }))
                   }
                   required
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pemex-green focus:border-pemex-green transition-colors duration-300 hover:border-pemex-green shadow-sm text-gray-800 font-medium"
@@ -484,24 +681,46 @@ function Herramientas() {
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <label className="block">
-                  <span className="text-pemex-green font-bold">Nombre</span>
+                  <span className="text-pemex-green font-bold">Herramienta</span>
+                  <select 
+                    value={selectedHerramienta?._id || ""} 
+                    onChange={(e) => {
+                      const herramienta = herramientas.find(h => h._id == e.target.value);
+                      setSelectedHerramienta(herramienta);
+                    }}
+                    className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" 
+                    required
+                  >
+                    <option value="">Selecciona una herramienta</option>
+                    {herramientas.map(herramienta => (
+                      <option key={herramienta._id} value={herramienta._id}>
+                        {herramienta.nombre_herramienta} - ID: {herramienta._id}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="text-pemex-green font-bold">Nombre del Trabajador</span>
                   <input type="text" name="nombre" value={form.nombre} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" required />
                 </label>
-                <label className="block"><span className="text-pemex-green font-bold">Ficha</span>
-                  <input type="text" name="ficha" value={form.ficha} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" required />
+                <label className="block">
+                  <span className="text-pemex-green font-bold">Ficha del Trabajador</span>
+                  <input type="number" name="ficha" value={form.ficha} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" required />
                 </label>
-                <label className="block"><span className="text-pemex-green font-bold">Status</span>
+                <label className="block">
+                  <span className="text-pemex-green font-bold">Status</span>
                   <select name="status" value={form.status} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700">
                     <option value="Pendiente">Pendiente</option>
                     <option value="Entregado">Entregado</option>
                   </select>
                 </label>
-                <label className="block"><span className="text-pemex-green font-bold">Fecha entregado</span>
-                  <input type="date" name="fechaEntregado" value={form.fechaEntregado} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" />
+                <label className="block">
+                  <span className="text-pemex-green font-bold">Fecha Recibido</span>
+                  <input type="date" name="fechaRecibido" value={form.fechaRecibido} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" />
                 </label>
                 <label className="block">
-                  <span className="text-pemex-green font-bold">Fecha recibido</span>
-                  <input type="date" name="fechaRecibido" value={form.fechaRecibido} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" />
+                  <span className="text-pemex-green font-bold">Fecha Entrega</span>
+                  <input type="date" name="fechaEntregado" value={form.fechaEntregado} onChange={handleChange} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" />
                 </label>
                 <div className="flex justify-end gap-2 pt-3">
                   <button type="button" onClick={toggleModalReporte} className="andform rounded bg-gray-200 px-4 py-2 font-bold text-gray-600 hover:bg-gray-300">Cancelar</button>
