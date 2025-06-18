@@ -10,7 +10,7 @@ function Herramientas() {
   const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalOpenAgrgar, setModalOpenAgregar] = useState(false);
+  const [modalOpenAgregar, setModalOpenAgregar] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const [editingHerramienta, setEditingHerramienta] = useState(null);
@@ -236,7 +236,7 @@ function Herramientas() {
     setModalOpen(!modalOpen);
   };
   const toggleModalAgregar = () => {
-    setModalOpenAgregar(!modalOpenAgrgar);
+    setModalOpenAgregar(!modalOpenAgregar);
   };
 
   const herramientasParaMostrar = searchTerm.trim()
@@ -456,7 +456,7 @@ function Herramientas() {
             ))}
           </div>
           <button onClick={toggleModalAgregar} className="fixed bottom-6 right-6 z-50 rounded-full bg-green-500  text-white py-3 px-5 shadow-lg hover:bg-green-700 transition-all duration-300 hover:animate-float flex " type="button">+</button>
-          {modalOpenAgrgar && (
+          {modalOpenAgregar && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm" aria-modal="true" role="dialog">
               <div className="bg-white rounded-xl p-8 w-70   max-w-md shadow-2xl  nimate-[slideIn_0.35s_ease-out] transform transition-transform duration-300 hover:scale-[1.015] overflow-y-auto max-h-screen" >
                 <h2 className="text-3xl font-extrabold text-center text-pemex-green mb-8 tracking-wide">Agregar Nueva Herramienta</h2>
