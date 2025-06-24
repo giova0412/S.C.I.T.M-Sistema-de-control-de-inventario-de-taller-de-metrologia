@@ -22,7 +22,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build-react": "react-scripts build",
+    "build-electron": "npm run build-react && electron-builder"
   },
   "eslintConfig": {
     "extends": [
@@ -44,7 +46,30 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
+    "electron": "^36.5.0",
+    "electron-builder": "^26.0.12",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.0"
-  }
+  },
+  "main": "electron.js",
+  "build": {
+    "appId": "com.scitm.inventario",
+    "productName": "SCITM-Inventario",
+    "directories": {
+      "output": "../Descargas"
+    },
+    "files": [
+      "build/**/*",
+      "electron.js",
+      "../src/**/*",
+      "../.env"
+    ],
+    "win": {
+      "icon": "public/favicon.ico",
+      "target": "nsis"
+    }
+  },
+  "description": "Sistema de control de inventario de taller de metrología.",
+  "author": "Tu Nombre <tu.email@dominio.com>",
+  "homepage": "."
 }

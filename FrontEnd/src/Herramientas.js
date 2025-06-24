@@ -410,6 +410,12 @@ function Herramientas() {
                         {herramienta.estado_calibracion || 'Pendiente de calibración'}
                       </span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 font-medium">Préstamo:</span>
+                      <span className={`text-sm font-bold ${herramienta.prestada ? 'text-red-600' : 'text-green-600'}`}>
+                        {herramienta.prestada ? 'Prestada' : 'Disponible'}
+                      </span>
+                    </div>
                   </div>
                   <div className="px-4 pt-2">
                     <label className="flex items-center space-x-2 cursor-pointer">

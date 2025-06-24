@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from './api/authService';
 
@@ -49,6 +49,19 @@ function App() {
     navigate('/recovery');
   };
 
+  useEffect(() => {
+    if (window.electronAPI && window.electronAPI.readFile) {
+      window.electronAPI.readFile('C:/Users/casa/Documents/S.C.I.T.M-Sistema-de-control-de-inventario-de-taller-de-metrologia/README.md')
+        .then(result => {
+          if (result.success) {
+            console.log('Contenido del archivo:', result.data);
+          } else {
+            console.error('Error leyendo archivo:', result.error);
+          }
+        });
+    }
+  }, []);
+
   return (
     <div className="bg-pemex-gray min-h-screen">
       <nav className="bg-pemex-green p-4 fixed top-0 w-full shadow-md z-10">
@@ -61,7 +74,7 @@ function App() {
 
       <div className="flex justify-center items-center min-h-screen pt-20">
         <form onSubmit={handleSubmit} className="bg-pemex-white shadow-lg rounded-xl px-10 pt-8 pb-10 w-96">
-          <img src="/logo.png" alt="logo" className="w-24 mx-auto mb-4" />
+          <img src={process.env.PUBLIC_URL + '/logo.png'} alt="logo" className="w-24 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-6 text-center text-pemex-green">Inicia Sesión</h1>
           <div className="mb-5">
             <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">

@@ -1,0 +1,71 @@
+{
+  "name": "scitm-electron",
+  "version": "1.0.0",
+  "main": "electron.cjs",
+  "description": "App de escritorio SCITM",
+  "author": "Tu Nombre <tu.email@dominio.com>",
+  "scripts": {
+    "build-electron": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0"
+  },
+  "build": {
+    "appId": "com.scitm.inventario",
+    "productName": "SCITM-Inventario",
+    "directories": {
+      "output": "../Descargas"
+    },
+    "files": [
+      "electron.cjs",
+      "preload.js",
+      "build/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules",
+        "to": "node_modules",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "src",
+        "to": "src"
+      },
+      {
+        "from": "node.exe",
+        "to": "node.exe"
+      },
+      {
+        "from": "../.env",
+        "to": ".env"
+      }
+    ],
+    "win": {
+      "icon": "../FrontEnd/public/favicon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SCITM Inventario",
+      "installerIcon": "../FrontEnd/public/favicon.ico",
+      "uninstallerIcon": "../FrontEnd/public/favicon.ico"
+    }
+  }
+}

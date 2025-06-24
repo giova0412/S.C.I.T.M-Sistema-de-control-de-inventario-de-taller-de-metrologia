@@ -1,0 +1,37 @@
+directories:
+  output: ../Descargas
+  buildResources: build
+appId: com.scitm.inventario
+productName: SCITM-Inventario
+files:
+  - filter:
+      - electron.cjs
+      - preload.js
+      - build/**/*
+      - package.json
+extraResources:
+  - from: node_modules
+    to: node_modules
+    filter:
+      - '**/*'
+  - from: src
+    to: src
+  - from: node.exe
+    to: node.exe
+  - from: ../.env
+    to: .env
+win:
+  icon: ../FrontEnd/public/favicon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: SCITM Inventario
+  installerIcon: ../FrontEnd/public/favicon.ico
+  uninstallerIcon: ../FrontEnd/public/favicon.ico
+electronVersion: 26.6.10

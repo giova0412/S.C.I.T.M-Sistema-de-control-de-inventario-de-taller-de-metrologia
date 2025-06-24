@@ -1,8 +1,13 @@
 import axios from 'axios';
 
+// Detectar si estamos en Electron
+const isElectron = Boolean(window && window.process && window.process.type);
+
 // Configuración base de axios
 const api = axios.create({
-    baseURL: 'http://localhost:3001/api',
+    baseURL: isElectron
+        ? 'http://localhost:3001/api' // En Electron, el backend local
+        : process.env.REACT_APP_API_URL || 'http://localhost:3001/api', // En web, variable de entorno o localhost
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',

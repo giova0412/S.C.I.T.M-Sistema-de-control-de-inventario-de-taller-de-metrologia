@@ -16,7 +16,8 @@ const Reportes = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [tab, setTab] = useState("all");
     const [editingReporte, setEditingReporte] = useState(null);
-    const [selectedHerramienta, setSelectedHerramienta] = useState(null);
+    const [selectedHerramientas, setSelectedHerramientas] = useState([]);
+    const [editingHerramientas, setEditingHerramientas] = useState([]);
     
     // Cargar reportes y herramientas al montar el componente
     useEffect(() => {
@@ -57,6 +58,7 @@ const Reportes = () => {
             fechaRecibido: reporte.fecha_recibido ? new Date(reporte.fecha_recibido).toISOString().split('T')[0] : ""
         };
         setEditingReporte(reporteFormato);
+        setEditingHerramientas(reporte.id_herramienta ? reporte.id_herramienta.map(String) : []);
         setEditModalOpen(true);
     };
 
@@ -81,7 +83,7 @@ const Reportes = () => {
                 fechaEntregado: "",
                 fechaRecibido: "",
             });
-            setSelectedHerramienta(null);
+            setSelectedHerramientas([]);
         }
     };
 
@@ -98,9 +100,9 @@ const Reportes = () => {
     // Enviar formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Validación simple
-        if (!form.nombre || !form.ficha || !selectedHerramienta) {
-            alert("Completa nombre, ficha y selecciona una herramienta");
+        // Validación para selección múltiple
+        if (!form.nombre || !form.ficha || selectedHerramientas.length === 0) {
+            alert("Completa nombre, ficha y selecciona al menos una herramienta");
             return;
         }
         try {
@@ -108,7 +110,7 @@ const Reportes = () => {
             const reporteData = {
                 ficha_trabajador: parseInt(form.ficha),
                 nombre: form.nombre,
-                id_herramienta: selectedHerramienta._id,
+                id_herramienta: selectedHerramientas.map(id => parseInt(id)),
                 fecha_recibido: form.fechaRecibido ? new Date(form.fechaRecibido) : new Date(),
                 fecha_entrega: form.fechaEntregado ? new Date(form.fechaEntregado) : new Date(),
                 estado_entrega: form.status === "Entregado" ? "Entregado" : "pendiente"
@@ -123,7 +125,7 @@ const Reportes = () => {
                 fechaEntregado: "",
                 fechaRecibido: "",
             });
-            setSelectedHerramienta(null);
+            setSelectedHerramientas([]);
             toggleModalReporte();
         } catch (err) {
             console.error('Error al crear reporte:', err);
@@ -139,6 +141,7 @@ const Reportes = () => {
             const reporteData = {
                 nombre: editingReporte.nombre,
                 ficha_trabajador: parseInt(editingReporte.ficha),
+                id_herramienta: editingHerramientas.map(id => parseInt(id)),
                 fecha_recibido: editingReporte.fechaRecibido ? new Date(editingReporte.fechaRecibido) : new Date(),
                 fecha_entrega: editingReporte.fechaEntregado ? new Date(editingReporte.fechaEntregado) : new Date(),
                 estado_entrega: editingReporte.status === "Entregado" ? "Entregado" : "pendiente"
@@ -432,7 +435,7 @@ const Reportes = () => {
                                     <tr key={index} className={`border border-blue-gray-50 ${index % 2 === 0 ? "bg-pemex-green/10" : "bg-white"}`}>
                                         <td className="p-4 capitalize">{reporte.nombre}</td>
                                         <td className="p-4">{reporte.ficha_trabajador || reporte._id}</td>
-                                        <td className="p-4 capitalize">{reporte.nombre_herramienta || 'No disponible'}</td>
+                                        <td className="p-4 capitalize">{(reporte.nombres_herramientas && reporte.nombres_herramientas.length > 0) ? reporte.nombres_herramientas.join(", ") : 'No disponible'}</td>
                                         <td className="p-4">
                                             <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold ${reporte.estado_entrega === "pendiente"? "bg-red-100 text-red-800": "bg-green-100 text-green-800"} transition-all duration-300 hover:scale-105`}>
                                                 <span className={`w-2 h-2 mr-2 rounded-full ${reporte.estado_entrega === "pendiente" ? "bg-red-500": "bg-green-500"}`}></span>
@@ -508,23 +511,24 @@ const Reportes = () => {
 
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <label className="block">
-                                    <span className="text-pemex-green font-bold">Herramienta</span>
-                                    <select 
-                                        value={selectedHerramienta?._id || ""} 
-                                        onChange={(e) => {
-                                            const herramienta = herramientas.find(h => h._id == e.target.value);
-                                            setSelectedHerramienta(herramienta);
+                                    <span className="text-pemex-green font-bold">Herramientas</span>
+                                    <select
+                                        multiple
+                                        value={selectedHerramientas}
+                                        onChange={e => {
+                                            const options = Array.from(e.target.selectedOptions, option => option.value);
+                                            setSelectedHerramientas(options);
                                         }}
-                                        className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700" 
+                                        className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"
                                         required
                                     >
-                                        <option value="">Selecciona una herramienta</option>
                                         {herramientas.map(herramienta => (
                                             <option key={herramienta._id} value={herramienta._id}>
                                                 {herramienta.nombre_herramienta} - ID: {herramienta._id}
                                             </option>
                                         ))}
                                     </select>
+                                    <span className="text-xs text-gray-500">(Mantén Ctrl o Shift para seleccionar varias)</span>
                                 </label>
 
                                 <label className="block">
@@ -602,7 +606,28 @@ const Reportes = () => {
 
                                 <label className="block">
                                     <span className="text-pemex-green font-bold">Fecha recibido</span>
-                                    <input type="date" value={editingReporte.fechaRecibido}vonChange={(e) => setEditingReporte({ ...editingReporte, fechaRecibido: e.target.value })} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"/>
+                                    <input type="date" value={editingReporte.fechaRecibido} onChange={(e) => setEditingReporte({ ...editingReporte, fechaRecibido: e.target.value })} className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"/>
+                                </label>
+
+                                <label className="block">
+                                    <span className="text-pemex-green font-bold">Herramientas</span>
+                                    <select
+                                        multiple
+                                        value={editingHerramientas}
+                                        onChange={e => {
+                                            const options = Array.from(e.target.selectedOptions, option => option.value);
+                                            setEditingHerramientas(options);
+                                        }}
+                                        className="andform w-full rounded border border-pemex-green px-3 py-2 text-sm text-gray-700"
+                                        required
+                                    >
+                                        {herramientas.map(herramienta => (
+                                            <option key={herramienta._id} value={herramienta._id}>
+                                                {herramienta.nombre_herramienta} - ID: {herramienta._id}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <span className="text-xs text-gray-500">(Mantén Ctrl o Shift para seleccionar varias)</span>
                                 </label>
 
                                 <div className="flex justify-end gap-2 pt-3">
