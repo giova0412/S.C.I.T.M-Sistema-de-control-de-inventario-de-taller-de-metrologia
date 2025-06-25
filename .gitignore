@@ -145,3 +145,39 @@ src/uploads/*.webp
 src/uploads/*.svg
 src/uploads/*.bmp
 src/uploads/*.tiff
+
+# Archivos de imágenes grandes
+**/uploads/*.jpg
+**/uploads/*.jpeg
+**/uploads/*.png
+**/uploads/*.gif
+**/uploads/*.jfif
+**/uploads/*.JPG
+**/uploads/*.JPEG
+**/uploads/*.PNG
+
+# Archivos ejecutables
+*.exe
+*.dll
+
+# Node modules
+**/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Archivos de build
+build/
+dist/
+
+# Archivos de configuración local
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
