@@ -136,6 +136,12 @@ dist
 .pnp.*
 .qodo
 
+# ===========================================
+# IMÁGENES - CONFIGURACIÓN
+# ===========================================
+# Para subir imágenes específicas, comenta temporalmente las líneas que necesites
+# Ejemplo: # src/uploads/imagen-especifica.jpg
+
 # Imágenes subidas - excluir archivos de imagen pero mantener la carpeta
 src/uploads/*.jpg
 src/uploads/*.jpeg

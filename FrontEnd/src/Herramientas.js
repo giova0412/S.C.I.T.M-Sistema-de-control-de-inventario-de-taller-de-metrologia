@@ -239,12 +239,21 @@ function Herramientas() {
     setModalOpenAgregar(!modalOpenAgregar);
   };
 
-  const herramientasParaMostrar = searchTerm.trim()
-  ? herramientas.filter((herramienta) =>
-      herramienta.nombre_herramienta?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      herramienta.num_partida?.toString().includes(searchTerm)
-    )
-  : herramientas;
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8; // Cambia este valor para mostrar más/menos cards por página
+
+  const herramientasFiltradas = searchTerm.trim()
+    ? herramientas.filter((herramienta) =>
+        herramienta.nombre_herramienta?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        herramienta.num_partida?.toString().includes(searchTerm)
+      )
+    : herramientas;
+
+  const totalPages = Math.ceil(herramientasFiltradas.length / itemsPerPage);
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
+  const herramientasParaMostrar = herramientasFiltradas.slice(startIdx, endIdx);
 
   if (loading) {
     return (
@@ -371,14 +380,21 @@ function Herramientas() {
 
           <div className="grid grid-cols-4 gap-4 p-4">
             {herramientasParaMostrar.map((herramienta, index) => (
+              // ...existing code for cada card...
               <div key={`${herramienta._id}-${index}`} className="flex-shrink-0 w-90 cursor-pointer group relative flex flex-col my-6 bg-white shadow-md border border-slate-200 rounded-lg hover:shadow-lg transition-shadow duration-300">
+                {/* ...existing code de la card... */}
                 <div className="relative h-56 m-2.5 overflow-hidden text-white rounded-md ">
                   <div className="relative h-52 overflow-hidden">
-                    <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={herramienta.imagen_url || 'https://via.placeholder.com/300x200?text=Sin+Imagen'} alt={herramienta.nombre_herramienta} />
+                    <img 
+                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 bg-white" 
+                      src={herramienta.imagen_url || 'https://via.placeholder.com/300x200?text=Sin+Imagen'} 
+                      alt={herramienta.nombre_herramienta} 
+                      style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', background: 'white' }}
+                    />
                   </div>
                 </div>
                 <div className="p-4">
-                  <h6 className="mb-2 text-slate-800 text-xl font-bold"> {herramienta.nombre_herramienta} </h6>
+                  <h6 className="mb-2 text-slate-800 text-base font-semibold truncate text-center" title={herramienta.nombre_herramienta}> {herramienta.nombre_herramienta} </h6>
                   <div className="flex flex-col space-y-2">
                     <div className="flex justify-between">
                       <span className="text-slate-600 font-medium">ID:</span>
@@ -460,6 +476,25 @@ function Herramientas() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Paginación */}
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md font-bold ${currentPage === 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-pemex-green text-white hover:bg-pemex-dark-green'}`}
+            >
+              Anterior
+            </button>
+            <span className="mx-2 font-semibold text-gray-700">Página {currentPage} de {totalPages}</span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className={`px-3 py-1 rounded-md font-bold ${currentPage === totalPages || totalPages === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-pemex-green text-white hover:bg-pemex-dark-green'}`}
+            >
+              Siguiente
+            </button>
           </div>
           <button onClick={toggleModalAgregar} className="fixed bottom-6 right-6 z-50 rounded-full bg-green-500  text-white py-3 px-5 shadow-lg hover:bg-green-700 transition-all duration-300 hover:animate-float flex " type="button">+</button>
           {modalOpenAgregar && (
